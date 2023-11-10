@@ -43,7 +43,8 @@
         <activity
             android:name=".gui.MainActivity"
             android:launchMode="singleTask"
-            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout">
+            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
+            android:exported="true">
 
             <intent-filter>
                 <action android:name="de.tu_darmstadt.seemoo.nfcgate.main" />

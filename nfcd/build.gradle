@@ -1,12 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 34
     ndkVersion "26.1.10909125"
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 31
+        targetSdkVersion 34
         ndk {
             moduleName "nfcgate-native"
             //cFlags "-std=c++11" //  -fexceptions -marm -g -fPIE
