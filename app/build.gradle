@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdk 27
-    ndkVersion "22.1.7171670"
+    compileSdk 31
+    ndkVersion "26.1.10909125"
 
     lint {
         disable 'ExpiredTargetSdkVersion'
@@ -11,7 +11,7 @@ android {
     defaultConfig {
         applicationId "de.tu_darmstadt.seemoo.nfcgate"
         minSdkVersion 19
-        targetSdkVersion 27
+        targetSdkVersion 31
         versionCode 9
         versionName "2.3.0"
     }
