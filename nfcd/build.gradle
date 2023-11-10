@@ -5,7 +5,7 @@ android {
     ndkVersion "26.1.10909125"
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 26
         targetSdkVersion 34
         ndk {
             moduleName "nfcgate-native"
@@ -34,12 +34,20 @@ android {
         }
     }
     namespace 'de.tu_darmstadt.seemoo.nfcgate.nfcd'
+//    packagingOptions {
+//        // By default .so libraries are striped from debug information when creating APK
+//        // To prevent this make sure your .so files are matching that doNotStrip pattern
+//        // See Gradle pattern document for details:
+//        // https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/util/PatternFilterable.html
+//        doNotStrip "**"
+//    }
 }
 
 dependencies {
     //This must NOT be included
     //compile fileTree(include: ['*.jar'], dir: 'libs')
-    // provided files('libs/XposedBridgeApi-20150213.jar')
+    compileOnly files('libs/XposedBridgeApi-20150213.jar')
     compileOnly 'de.robv.android.xposed:api:82'
     compileOnly 'de.robv.android.xposed:api:82:sources'
+
 }

@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId "de.tu_darmstadt.seemoo.nfcgate"
-        minSdkVersion 19
+        minSdkVersion 26
         targetSdkVersion 34
         versionCode 9
         versionName "2.3.0"
@@ -22,6 +22,14 @@ android {
         }
     }
     namespace 'de.tu_darmstadt.seemoo.nfcgate'
+
+//    packagingOptions {
+//        // By default .so libraries are striped from debug information when creating APK
+//        // To prevent this make sure your .so files are matching that doNotStrip pattern
+//        // See Gradle pattern document for details:
+//        // https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/util/PatternFilterable.html
+//        doNotStrip "**"
+//    }
 }
 
 dependencies {
@@ -32,8 +40,8 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-lite:3.0.1'
 
     // support libraries
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support:design:27.1.1'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
 
     // Fixes most of the issues with the support-preference libraries (contains v7 and v14)
     implementation 'com.takisoft.fix:preference-v7:27.1.1.1'
@@ -48,10 +56,10 @@ dependencies {
     def archLifecycleVersion = '1.1.1'
 
     // Room
-    implementation "android.arch.persistence.room:runtime:$room_version"
-    annotationProcessor "android.arch.persistence.room:compiler:$room_version"
+    implementation 'androidx.room:room-runtime:2.0.0'
+    annotationProcessor 'androidx.room:room-compiler:2.0.0'
 
     // Lifecycle
-    implementation "android.arch.lifecycle:extensions:$archLifecycleVersion"
-    annotationProcessor "android.arch.lifecycle:compiler:$archLifecycleVersion"
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
+    annotationProcessor 'androidx.lifecycle:lifecycle-compiler:2.0.0'
 }

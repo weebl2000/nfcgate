@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+
 import java.util.ArrayList;
 
 public class InjectionBroadcastWrapper extends BroadcastReceiver {
@@ -27,7 +28,7 @@ public class InjectionBroadcastWrapper extends BroadcastReceiver {
         // start broadcast receiver on handler thread
         HandlerThread ht = new HandlerThread("ht");
         ht.start();
-        ctx.registerReceiver(this, new IntentFilter("de.tu_darmstadt.seemoo.nfcgate.daemoncall"), null, new Handler(ht.getLooper()));
+        ctx.registerReceiver(this, new IntentFilter("de.tu_darmstadt.seemoo.nfcgate.daemoncall"), null, new Handler(ht.getLooper()), Context.RECEIVER_EXPORTED);
     }
 
     public boolean isHookEnabled() {
@@ -99,6 +100,7 @@ public class InjectionBroadcastWrapper extends BroadcastReceiver {
         }
 
         // try to load the library
+        Log.i("HOOKNFC", "trying to load: " + libPath);
         System.load(libPath);
     }
 

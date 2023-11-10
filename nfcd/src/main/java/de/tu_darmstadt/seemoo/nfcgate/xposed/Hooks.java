@@ -22,140 +22,150 @@ import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
 public class Hooks implements IXposedHookLoadPackage {
 
+    static {
+        Log.i("HOOKNFC", "Class loaded Wessel");
+    }
+
     private Object mReceiver;
 
     public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
-        // hook our own NfcManager to indicate that the hook is loaded and active
-        if ("de.tu_darmstadt.seemoo.nfcgate".equals(lpparam.packageName)) {
-            // indicate that the hook worked and the xposed module is active
-            findAndHookMethod("de.tu_darmstadt.seemoo.nfcgate.nfc.NfcManager", lpparam.classLoader,
-                    "isModuleLoaded", XC_MethodReplacement.returnConstant(true));
-        } else if ("com.android.nfc".equals(lpparam.packageName)) {
-            // hook constructor to catch application context
-            findAndHookConstructor("com.android.nfc.NfcService", lpparam.classLoader,
-                    Application.class, new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+        try {
+            Log.i("HOOKNFC", "package: " + lpparam.packageName);
+            // hook our own NfcManager to indicate that the hook is loaded and active
+            if ("de.tu_darmstadt.seemoo.nfcgate".equals(lpparam.packageName)) {
+                // indicate that the hook worked and the xposed module is active
+                findAndHookMethod("de.tu_darmstadt.seemoo.nfcgate.nfc.NfcManager", lpparam.classLoader,
+                        "isModuleLoaded", XC_MethodReplacement.returnConstant(true));
+            } else if ("com.android.nfc".equals(lpparam.packageName)) {
+                // hook constructor to catch application context
+                findAndHookConstructor("com.android.nfc.NfcService", lpparam.classLoader,
+                        Application.class, new XC_MethodHook() {
+                            @Override
+                            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 
-                    // using context, inject our class into the nfc service class loader
-                    mReceiver = loadOrInjectClass((Application) param.args[0],
-                            "de.tu_darmstadt.seemoo.nfcgate", getClass().getClassLoader(),
-                            lpparam.classLoader, "de.tu_darmstadt.seemoo.nfcgate.xposed.InjectionBroadcastWrapper");
-                }
-            });
+                                // using context, inject our class into the nfc service class loader
+                                mReceiver = loadOrInjectClass((Application) param.args[0],
+                                        "de.tu_darmstadt.seemoo.nfcgate", getClass().getClassLoader(),
+                                        lpparam.classLoader, "de.tu_darmstadt.seemoo.nfcgate.xposed.InjectionBroadcastWrapper");
+                            }
+                        });
 
-            // hook findSelectAid to route all HCE APDUs to our app
-            findAndHookMethod("com.android.nfc.cardemulation.HostEmulationManager", lpparam.classLoader,
-                    "findSelectAid",
-                    byte[].class, new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                // hook findSelectAid to route all HCE APDUs to our app
+                findAndHookMethod("com.android.nfc.cardemulation.HostEmulationManager", lpparam.classLoader,
+                        "findSelectAid",
+                        byte[].class, new XC_MethodHook() {
+                            @Override
+                            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 
-                    if (isPatchEnabled()) {
-                        // setting a result will overwrite the original result
-                        // F0010203040506 is a aid registered by the nfcgate hce service
-                        param.setResult("F0010203040506");
-                    }
-                }
-            });
+                                if (isPatchEnabled()) {
+                                    // setting a result will overwrite the original result
+                                    // F0010203040506 is a aid registered by the nfcgate hce service
+                                    param.setResult("F0010203040506");
+                                }
+                            }
+                        });
 
-            // support extended length apdus
-            // see http://stackoverflow.com/questions/25913480/what-are-the-requirements-for-support-of-extended-length-apdus-and-which-smartph
-            findAndHookMethod("com.android.nfc.dhimpl.NativeNfcManager", lpparam.classLoader,
-                    "getMaxTransceiveLength",
-                    int.class, new XC_MethodHook() {
-                @Override
-                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                // support extended length apdus
+                // see http://stackoverflow.com/questions/25913480/what-are-the-requirements-for-support-of-extended-length-apdus-and-which-smartph
+                findAndHookMethod("com.android.nfc.dhimpl.NativeNfcManager", lpparam.classLoader,
+                        "getMaxTransceiveLength",
+                        int.class, new XC_MethodHook() {
+                            @Override
+                            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
 
-                    int technology = (int) param.args[0];
-                    if (technology == 3 /* 3=TagTechnology.ISO_DEP */) {
-                        param.setResult(2462);
-                    }
-                }
-            });
+                                int technology = (int) param.args[0];
+                                if (technology == 3 /* 3=TagTechnology.ISO_DEP */) {
+                                    param.setResult(2462);
+                                }
+                            }
+                        });
 
-            // hook transceive method for on-device capture of request/response data
-            findAndHookMethod("com.android.nfc.NfcService.TagService", lpparam.classLoader,
-                    "transceive",
-                    int.class, byte[].class, boolean.class, new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                // hook transceive method for on-device capture of request/response data
+                findAndHookMethod("com.android.nfc.NfcService.TagService", lpparam.classLoader,
+                        "transceive",
+                        int.class, byte[].class, boolean.class, new XC_MethodHook() {
+                            @Override
+                            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 
-                    if (isCaptureEnabled()) {
-                        byte[] commandData = (byte[]) param.args[1];
-                        addCaptureData(false, commandData);
+                                if (isCaptureEnabled()) {
+                                    byte[] commandData = (byte[]) param.args[1];
+                                    addCaptureData(false, commandData);
 
-                        byte[] responseData = (byte[]) param.getResult().getClass().getMethod("getResponseOrThrow").invoke(param.getResult());
-                        addCaptureData(true, responseData);
+                                    byte[] responseData = (byte[]) param.getResult().getClass().getMethod("getResponseOrThrow").invoke(param.getResult());
+                                    addCaptureData(true, responseData);
 
-                        Log.d("HOOKNFC", "Captured tag read");
-                    }
+                                    Log.d("HOOKNFC", "Captured tag read");
+                                }
 
-                }
-            });
+                            }
+                        });
 
-            // hook tag dispatch for on-device capture of initial data
-            findAndHookMethod("com.android.nfc.NfcDispatcher", lpparam.classLoader,
-                    "dispatchTag",
-                    Tag.class, new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                // hook tag dispatch for on-device capture of initial data
+                findAndHookMethod("com.android.nfc.NfcDispatcher", lpparam.classLoader,
+                        "dispatchTag",
+                        Tag.class, new XC_MethodHook() {
+                            @Override
+                            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 
-                    if (isCaptureEnabled()) {
-                        Tag tag = (Tag) param.args[0];
-                        addCaptureInitial(tag);
+                                if (isCaptureEnabled()) {
+                                    Tag tag = (Tag) param.args[0];
+                                    addCaptureInitial(tag);
 
-                        Log.d("HOOKNFC", "Captured initial data");
-                    }
-                }
-            });
+                                    Log.d("HOOKNFC", "Captured initial data");
+                                }
+                            }
+                        });
 
-            // hook onHostEmulationData method for on-device HCE request capture
-            findAndHookMethod("com.android.nfc.cardemulation.HostEmulationManager", lpparam.classLoader,
-                    preLollipop("notifyHostEmulationData", "onHostEmulationData"),
-                    byte[].class, new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                // hook onHostEmulationData method for on-device HCE request capture
+                findAndHookMethod("com.android.nfc.cardemulation.HostEmulationManager", lpparam.classLoader,
+                        preLollipop("notifyHostEmulationData", "onHostEmulationData"),
+                        byte[].class, new XC_MethodHook() {
+                            @Override
+                            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 
-                    if (isCaptureEnabled()) {
-                        byte[] commandData = (byte[]) param.args[0];
-                        addCaptureData(false, commandData);
+                                if (isCaptureEnabled()) {
+                                    byte[] commandData = (byte[]) param.args[0];
+                                    addCaptureData(false, commandData);
 
-                        Log.d("HOOKNFC", "Captured HCE request");
-                    }
-                }
-            });
+                                    Log.d("HOOKNFC", "Captured HCE request");
+                                }
+                            }
+                        });
 
-            // hook notifyHostEmulationActivated method for on-device HCE initial capture
-            findAndHookMethod("com.android.nfc.cardemulation.HostEmulationManager", lpparam.classLoader,
-                    preLollipop("notifyHostEmulationActivated", "onHostEmulationActivated"),
-                    new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                // hook notifyHostEmulationActivated method for on-device HCE initial capture
+                findAndHookMethod("com.android.nfc.cardemulation.HostEmulationManager", lpparam.classLoader,
+                        preLollipop("notifyHostEmulationActivated", "onHostEmulationActivated"),
+                        new XC_MethodHook() {
+                            @Override
+                            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 
-                    if (isCaptureEnabled()) {
-                        addCaptureInitial(null);
+                                if (isCaptureEnabled()) {
+                                    addCaptureInitial(null);
 
-                        Log.d("HOOKNFC", "Captured HCE initial data");
-                    }
-                }
-            });
+                                    Log.d("HOOKNFC", "Captured HCE initial data");
+                                }
+                            }
+                        });
 
-            // hook sendData method for on-device HCE response capture
-            findAndHookMethod("com.android.nfc.NfcService", lpparam.classLoader,
-                    "sendData",
-                    byte[].class, new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                // hook sendData method for on-device HCE response capture
+                findAndHookMethod("com.android.nfc.NfcService", lpparam.classLoader,
+                        "sendData",
+                        byte[].class, new XC_MethodHook() {
+                            @Override
+                            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 
-                    if (isCaptureEnabled()) {
-                        byte[] responseData = (byte[]) param.args[0];
-                        addCaptureData(true, responseData);
+                                if (isCaptureEnabled()) {
+                                    byte[] responseData = (byte[]) param.args[0];
+                                    addCaptureData(true, responseData);
 
-                        Log.d("HOOKNFC", "Captured HCE response");
-                    }
-                }
-            });
+                                    Log.d("HOOKNFC", "Captured HCE response");
+                                }
+                            }
+                        });
+            }
+        } catch (Throwable t) {
+            Log.e("HOOKNFC", t.getMessage());
+            throw t;
         }
     }
 
