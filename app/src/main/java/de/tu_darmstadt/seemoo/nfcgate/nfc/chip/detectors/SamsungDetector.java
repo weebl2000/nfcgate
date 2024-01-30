@@ -2,7 +2,6 @@ package de.tu_darmstadt.seemoo.nfcgate.nfc.chip.detectors;
 
 import android.util.Pair;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;

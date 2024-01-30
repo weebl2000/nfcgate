@@ -1,8 +1,6 @@
 package de.tu_darmstadt.seemoo.nfcgate.gui.log;
 
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
@@ -12,7 +10,6 @@ import java.util.Objects;
 import de.tu_darmstadt.seemoo.nfcgate.db.AppDatabase;
 import de.tu_darmstadt.seemoo.nfcgate.db.NfcCommEntry;
 import de.tu_darmstadt.seemoo.nfcgate.db.SessionLog;
-import de.tu_darmstadt.seemoo.nfcgate.db.SessionLogJoin;
 import de.tu_darmstadt.seemoo.nfcgate.db.model.SessionLogEntryViewModel;
 import de.tu_darmstadt.seemoo.nfcgate.db.model.SessionLogEntryViewModelFactory;
 import de.tu_darmstadt.seemoo.nfcgate.db.pcapng.ISO14443Stream;

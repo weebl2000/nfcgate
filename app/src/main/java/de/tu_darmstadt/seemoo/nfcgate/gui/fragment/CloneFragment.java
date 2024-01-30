@@ -1,9 +1,9 @@
 package de.tu_darmstadt.seemoo.nfcgate.gui.fragment;
 
 import android.app.AlertDialog;
-import androidx.lifecycle.Observer;
+
 import androidx.lifecycle.ViewModelProviders;
-import android.content.DialogInterface;
+
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,14 +15,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.List;
 import java.util.Objects;
 
 import de.tu_darmstadt.seemoo.nfcgate.R;
@@ -85,6 +83,7 @@ public class CloneFragment extends BaseFragment {
             if (position >= 0) {
                 // load configuration of saved tag
                 final TagInfo item = mTagInfoAdapter.getItem(position);
+                assert item != null;
                 getNfc().handleData(false, new NfcComm(item.getData()));
             }
         });

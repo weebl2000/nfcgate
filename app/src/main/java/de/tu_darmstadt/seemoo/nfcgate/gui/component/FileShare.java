@@ -54,15 +54,12 @@ public class FileShare {
         File shareDir = new File(mContext.getCacheDir() + "/share/");
         shareDir.mkdir();
 
-        File file;
-        try {
-            // create file with given prefix and extension
-            file = new File(shareDir, mPrefix + mExtension);
+        // create file with given prefix and extension
+        File file = new File(shareDir, mPrefix + mExtension);
+        try (final OutputStream stream = new FileOutputStream(file)){
 
             // write to file (overwrites if already exists)
-            OutputStream stream = new FileOutputStream(file);
             share.write(stream);
-            stream.close();
         }
         catch (IOException e) {
             Toast.makeText(mContext, mContext.getString(R.string.share_error),

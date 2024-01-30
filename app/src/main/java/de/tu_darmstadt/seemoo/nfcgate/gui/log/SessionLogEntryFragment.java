@@ -1,6 +1,5 @@
 package de.tu_darmstadt.seemoo.nfcgate.gui.log;
 
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
@@ -28,7 +27,6 @@ import java.util.Objects;
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.NfcCommEntry;
 import de.tu_darmstadt.seemoo.nfcgate.db.SessionLog;
-import de.tu_darmstadt.seemoo.nfcgate.db.SessionLogJoin;
 import de.tu_darmstadt.seemoo.nfcgate.db.model.SessionLogEntryViewModel;
 import de.tu_darmstadt.seemoo.nfcgate.db.model.SessionLogEntryViewModelFactory;
 import de.tu_darmstadt.seemoo.nfcgate.gui.component.CustomArrayAdapter;
@@ -165,7 +163,7 @@ public class SessionLogEntryFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private class SessionLogEntryListAdapter extends CustomArrayAdapter<NfcComm> {
+    private static class SessionLogEntryListAdapter extends CustomArrayAdapter<NfcComm> {
         SessionLogEntryListAdapter(@NonNull Context context, int resource) {
             super(context, resource);
         }

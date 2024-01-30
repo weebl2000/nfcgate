@@ -20,8 +20,6 @@ import android.widget.TextView;
 
 import com.jaredrummler.android.device.DeviceName;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Objects;
 
 import de.tu_darmstadt.seemoo.nfcgate.BuildConfig;
@@ -112,7 +110,7 @@ public class StatusFragment extends BaseFragment {
     void exportData() {
         final StringBuilder str = new StringBuilder();
         for (int i = 0; i < mStatusAdapter.getCount();  i++)
-            str.append(str.length() == 0 ? "" : "\n").append(Objects.requireNonNull(mStatusAdapter.getItem(i)).toString());
+            str.append(str.length() == 0 ? "" : "\n").append(Objects.requireNonNull(mStatusAdapter.getItem(i)));
 
         new FileShare(getActivity())
                 .setPrefix("config")
@@ -226,7 +224,7 @@ public class StatusFragment extends BaseFragment {
         return result;
     }
 
-    private class StatusListAdapter extends CustomArrayAdapter<StatusItem> {
+    private static class StatusListAdapter extends CustomArrayAdapter<StatusItem> {
         StatusListAdapter(@NonNull Context context, int resource) {
             super(context, resource);
         }
