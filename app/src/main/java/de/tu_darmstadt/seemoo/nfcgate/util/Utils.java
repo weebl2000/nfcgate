@@ -7,7 +7,7 @@ public class Utils {
     /**
      * Convert a byte-array to a hexadecimal String.
      * <p>
-     * f<a href="rom">https://stackoverflow.com/a/9855338/20</a>7861
+     * <a href="from">https://stackoverflow.com/a/9855338/207861</a>
      *
      * @param bytes Byte[] to convert to String
      * @return Byte[] as hex-string
