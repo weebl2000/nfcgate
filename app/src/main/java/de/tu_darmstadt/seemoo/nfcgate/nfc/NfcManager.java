@@ -10,6 +10,8 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.util.Log;
 
+import java.util.Objects;
+
 import de.tu_darmstadt.seemoo.nfcgate.gui.MainActivity;
 import de.tu_darmstadt.seemoo.nfcgate.network.NetworkManager;
 import de.tu_darmstadt.seemoo.nfcgate.network.data.NetworkStatus;
@@ -31,7 +33,7 @@ public class NfcManager implements NfcAdapter.ReaderCallback, NetworkManager.Cal
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(NfcAdapter.ACTION_ADAPTER_STATE_CHANGED))
+            if (Objects.requireNonNull(intent.getAction()).equals(NfcAdapter.ACTION_ADAPTER_STATE_CHANGED))
                     notifyStatusChanged();
         }
     };
@@ -43,11 +45,11 @@ public class NfcManager implements NfcAdapter.ReaderCallback, NetworkManager.Cal
     }
 
     // references
-    private MainActivity mActivity;
-    private NfcAdapter mAdapter;
+    private final MainActivity mActivity;
+    private final NfcAdapter mAdapter;
     private ApduService mApduService;
-    private DaemonManager mDaemon;
-    private NetworkManager mNetwork;
+    private final DaemonManager mDaemon;
+    private final NetworkManager mNetwork;
     private StatusChangedListener mStatusChanged;
 
     // state
@@ -83,6 +85,7 @@ public class NfcManager implements NfcAdapter.ReaderCallback, NetworkManager.Cal
     /**
      * Indicates whether the Xposed module is enabled
      * This is hooked by the module to return true
+     * @noinspection SameReturnValue
      */
     public static boolean isModuleLoaded() {
         return false;
@@ -282,13 +285,10 @@ public class NfcManager implements NfcAdapter.ReaderCallback, NetworkManager.Cal
 
     @Override
     public void onReceive(final NfcComm data) {
-        mActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // handle data on UI thread
-                // use our timestamp instead of the remote
-                handleData(true, new NfcComm(data.isCard(), data.isInitial(), data.getData()));
-            }
+        mActivity.runOnUiThread(() -> {
+            // handle data on UI thread
+            // use our timestamp instead of the remote
+            handleData(true, new NfcComm(data.isCard(), data.isInitial(), data.getData()));
         });
     }
 

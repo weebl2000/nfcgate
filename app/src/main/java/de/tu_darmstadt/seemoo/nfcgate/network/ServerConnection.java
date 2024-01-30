@@ -5,7 +5,6 @@ import android.util.Log;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -29,12 +28,12 @@ public class ServerConnection {
     // threading
     private SendThread mSendThread;
     private ReceiveThread mReceiveThread;
-    private BlockingQueue<SendRecord> mSendQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<SendRecord> mSendQueue = new LinkedBlockingQueue<>();
 
     // metadata
     private Callback mCallback;
-    private String mHostname;
-    private int mPort;
+    private final String mHostname;
+    private final int mPort;
 
     ServerConnection(String hostname, int port) {
         mHostname = hostname;

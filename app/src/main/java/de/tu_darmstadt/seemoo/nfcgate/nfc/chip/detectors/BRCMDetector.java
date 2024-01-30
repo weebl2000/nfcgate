@@ -3,6 +3,7 @@ package de.tu_darmstadt.seemoo.nfcgate.nfc.chip.detectors;
 import android.util.Pair;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import de.tu_darmstadt.seemoo.nfcgate.nfc.chip.NfcChipGuess;
@@ -16,7 +17,7 @@ import de.tu_darmstadt.seemoo.nfcgate.nfc.chip.NfcChipGuess;
 public class BRCMDetector extends BaseConfigLineDetector {
     @Override
     protected List<String> getConfigFilenames() {
-        return Arrays.asList("libnfc-brcm.conf");
+        return Collections.singletonList("libnfc-brcm.conf");
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class NXPDetector extends BaseConfigLineDetector {
 
     @Override
     protected List<String> getConfigFilenames() {
-        List<String> result = new ArrayList<>(Arrays.asList("libnfc-nxp.conf"));
+        List<String> result = new ArrayList<>(Collections.singletonList("libnfc-nxp.conf"));
 
         // check SKU property for any NXP configs (often set, file rarely exists)
         String propHWSKU = getSystemProp("ro.boot.product.hardware.sku");

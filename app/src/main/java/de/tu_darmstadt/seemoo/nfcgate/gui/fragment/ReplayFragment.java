@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Objects;
 
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.NfcCommEntry;
@@ -33,7 +34,7 @@ import de.tu_darmstadt.seemoo.nfcgate.util.NfcComm;
 
 public class ReplayFragment extends BaseNetworkFragment implements LoggingFragment.LogItemSelectedCallback, SessionLogEntryFragment.LogSelectedCallback {
     // session selection reference
-    LoggingFragment mLoggingFragment = new LoggingFragment();
+    final LoggingFragment mLoggingFragment = new LoggingFragment();
     SessionLogEntryFragment mDetailFragment = null;
 
     // replay data
@@ -47,7 +48,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
         // set relay action text
-        v.<TextView>findViewById(R.id.txt_action).setText(getString(R.string.replay_action));
+        Objects.requireNonNull(v).<TextView>findViewById(R.id.txt_action).setText(getString(R.string.replay_action));
 
         // setup log item callback
         mLoggingFragment.setLogItemSelectedCallback(this);
@@ -76,7 +77,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
         mLogInserter = new LogInserter(getActivity(), SessionLog.SessionType.REPLAY, this);
 
         // get preference data
-        SharedPreferences prefs = PreferenceManagerFix.getDefaultSharedPreferences(getActivity());
+        SharedPreferences prefs = PreferenceManagerFix.getDefaultSharedPreferences(Objects.requireNonNull(getActivity()));
         mOfflineReplay = !prefs.getBoolean("network", false);
         mReplayMode = prefs.getString("mode", "index");
         mStatusBanner.setVisibility(!mOfflineReplay);
@@ -94,13 +95,13 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
     @Override
     public void onLogSelected(long sessionId) {
         // set subtitle
-        getMainActivity().getSupportActionBar().setSubtitle(getString(R.string.replay_session, sessionId));
+        Objects.requireNonNull(getMainActivity().getSupportActionBar()).setSubtitle(getString(R.string.replay_session, sessionId));
 
         // hide details chooser
         setSessionChooserVisible(false, -1);
 
         // load session data
-        ViewModelProviders.of(this, new SessionLogEntryViewModelFactory(getActivity().getApplication(), sessionId))
+        ViewModelProviders.of(this, new SessionLogEntryViewModelFactory(Objects.requireNonNull(getActivity()).getApplication(), sessionId))
                 .get(SessionLogEntryViewModel.class)
                 .getSession()
                 .observe(this, new Observer<SessionLogJoin>() {
@@ -111,12 +112,9 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
                         if (sessionLogJoin != null && mSessionLog == null && mOnce) {
                             mOnce = false;
                             mSessionLog = sessionLogJoin.getNfcCommEntries();
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // show reader/tag selector after session data is loaded
-                                    setSelectorVisible(true);
-                                }
+                            Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
+                                // show reader/tag selector after session data is loaded
+                                setSelectorVisible(true);
                             });
                         }
                     }
@@ -143,7 +141,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
             mReplayer.reset();
 
         // clear subtitle
-        getMainActivity().getSupportActionBar().setSubtitle(getString(R.string.replay_session_select));
+        Objects.requireNonNull(getMainActivity().getSupportActionBar()).setSubtitle(getString(R.string.replay_session_select));
     }
 
     protected void onSelect(boolean reader) {
@@ -186,12 +184,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
     }
 
     void tickleReplayer() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mReplayer.onReceive(null);
-            }
-        });
+        Objects.requireNonNull(getActivity()).runOnUiThread(() -> mReplayer.onReceive(null));
     }
 
     /**
@@ -217,12 +210,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
             mLogInserter.log(data);
 
             // hide wait indicator
-            runOnUI(new Runnable() {
-                @Override
-                public void run() {
-                    setTagWaitVisible(false, false);
-                }
-            });
+            runOnUI(() -> setTagWaitVisible(false, false));
 
             // forward data to NFC or network
             super.onData(isForeign, data);
@@ -235,12 +223,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
                 super.toNetwork(data);
             else
                 // simulate network send
-                runOnUI(new Runnable() {
-                    @Override
-                    public void run() {
-                        mReplayer.onReceive(data);
-                    }
-                });
+                runOnUI(() -> mReplayer.onReceive(data));
         }
 
         @Override
@@ -248,17 +231,12 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
             super.onNetworkStatus(status);
 
             // report status
-            runOnUI(new Runnable() {
-                @Override
-                public void run() {
-                    handleStatus(status);
-                }
-            });
+            runOnUI(() -> handleStatus(status));
         }
     }
 
     class UIReplayer implements NetworkManager.Callback {
-        NfcLogReplayer mReplayer;
+        final NfcLogReplayer mReplayer;
         NetworkManager mReplayNetwork = null;
 
         UIReplayer(boolean reader) {
@@ -297,12 +275,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
             // report status
             final FragmentActivity activity = getActivity();
             if (activity != null) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        handleStatus(status);
-                    }
-                });
+                activity.runOnUiThread(() -> handleStatus(status));
             }
         }
     }

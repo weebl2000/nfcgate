@@ -22,6 +22,7 @@ import com.jaredrummler.android.device.DeviceName;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Objects;
 
 import de.tu_darmstadt.seemoo.nfcgate.BuildConfig;
 import de.tu_darmstadt.seemoo.nfcgate.R;
@@ -47,7 +48,7 @@ public class StatusFragment extends BaseFragment {
         // custom toolbar actions
         setHasOptionsMenu(true);
         // set version as subtitle
-        getMainActivity().getSupportActionBar().setSubtitle(getString(R.string.about_version, BuildConfig.VERSION_NAME));
+        Objects.requireNonNull(getMainActivity().getSupportActionBar()).setSubtitle(getString(R.string.about_version, BuildConfig.VERSION_NAME));
 
         // handlers
         mStatus.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -67,8 +68,8 @@ public class StatusFragment extends BaseFragment {
                 if (position >= 0) {
                     final StatusItem item = mStatusAdapter.getItem(position);
 
-                    if (item.getState() != StatusItem.State.OK) {
-                        new AlertDialog.Builder(getActivity())
+                    if (Objects.requireNonNull(item).getState() != StatusItem.State.OK) {
+                        new AlertDialog.Builder(Objects.requireNonNull(getActivity()))
                                 .setTitle(getString(item.getState() == StatusItem.State.WARN ?
                                         R.string.status_warning : R.string.status_error))
                                 .setPositiveButton(getString(R.string.button_ok), null)
@@ -87,7 +88,7 @@ public class StatusFragment extends BaseFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mStatusAdapter = new StatusListAdapter(getActivity(), R.layout.list_status);
+        mStatusAdapter = new StatusListAdapter(Objects.requireNonNull(getActivity()), R.layout.list_status);
         mStatus.setAdapter(mStatusAdapter);
 
         detect();
@@ -101,30 +102,23 @@ public class StatusFragment extends BaseFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_export:
-                exportData();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.action_export) {
+            exportData();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     void exportData() {
         final StringBuilder str = new StringBuilder();
         for (int i = 0; i < mStatusAdapter.getCount();  i++)
-            str.append(str.length() == 0 ? "" : "\n").append(mStatusAdapter.getItem(i).toString());
+            str.append(str.length() == 0 ? "" : "\n").append(Objects.requireNonNull(mStatusAdapter.getItem(i)).toString());
 
         new FileShare(getActivity())
                 .setPrefix("config")
                 .setExtension(".txt")
                 .setMimeType("text/plain")
-                .share(new FileShare.IFileShareable() {
-                    @Override
-                    public void write(OutputStream stream) throws IOException {
-                        stream.write(str.toString().getBytes());
-                    }
-                });
+                .share(stream -> stream.write(str.toString().getBytes()));
     }
 
     void detect() {
@@ -166,9 +160,7 @@ public class StatusFragment extends BaseFragment {
 
     StatusItem detectBuildNumber() {
         // build number
-        StatusItem result = new StatusItem(getContext(), getString(R.string.status_build)).setValue(Build.DISPLAY);
-
-        return result;
+        return new StatusItem(getContext(), getString(R.string.status_build)).setValue(Build.DISPLAY);
     }
 
     StatusItem detectNfcEnabled() {
@@ -221,13 +213,15 @@ public class StatusFragment extends BaseFragment {
 
     StatusItem detectNfcModel() {
         // null or chip model name
-        String chipName = new NfcChip().detect();
+        String chipName = NfcChip.detect();
         // Chip model should be OK if it can be detected
         StatusItem result = new StatusItem(getContext(), getString(R.string.status_chip))
                 .setValue(chipName != null ? chipName : getString(R.string.status_unknown));
 
-        if (chipName == null)
+        if (chipName == null) {
             result.setWarn(getString(R.string.warn_NFCMOD));
+            return result;
+        }
 
         return result;
     }
@@ -256,7 +250,7 @@ public class StatusFragment extends BaseFragment {
             View v = super.getView(position, convertView, parent);
             final StatusItem item = getItem(position);
 
-            v.<TextView>findViewById(R.id.status_name).setText(item.getName());
+            v.<TextView>findViewById(R.id.status_name).setText(Objects.requireNonNull(item).getName());
             v.<TextView>findViewById(R.id.status_value).setText(item.getValue());
             v.<ImageView>findViewById(R.id.status_icon).setImageResource(byState(item.getState()));
 

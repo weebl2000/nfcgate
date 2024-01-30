@@ -2,7 +2,7 @@ package de.tu_darmstadt.seemoo.nfcgate.nfc.config;
 
 /**
  * Defines available NFC Tag technologies.
- *
+ * <p>
  * We cannot define those as TagTechnology.class.getName() here otherwise we could not use these
  * constants in switch statements.
  */

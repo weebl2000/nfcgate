@@ -17,6 +17,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Objects;
+
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.worker.LogInserter;
 import de.tu_darmstadt.seemoo.nfcgate.gui.component.StatusBanner;
@@ -45,18 +47,8 @@ public abstract class BaseNetworkFragment extends BaseFragment implements LogIns
         mStatusBanner = new StatusBanner(getMainActivity());
 
         // selector setup
-        v.<LinearLayout>findViewById(R.id.select_reader).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onSelect(true);
-            }
-        });
-        v.<LinearLayout>findViewById(R.id.select_tag).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onSelect(false);
-            }
-        });
+        v.<LinearLayout>findViewById(R.id.select_reader).setOnClickListener(view -> onSelect(true));
+        v.<LinearLayout>findViewById(R.id.select_tag).setOnClickListener(view -> onSelect(false));
 
         setHasOptionsMenu(true);
         reset();
@@ -71,12 +63,10 @@ public abstract class BaseNetworkFragment extends BaseFragment implements LogIns
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_refresh:
-                reset();
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.action_refresh) {
+            reset();
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -132,7 +122,7 @@ public abstract class BaseNetworkFragment extends BaseFragment implements LogIns
      */
     private boolean isNetworkAvailable() {
         ConnectivityManager cm =
-                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+                (ConnectivityManager) Objects.requireNonNull(getActivity()).getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnected();
     }
@@ -141,7 +131,7 @@ public abstract class BaseNetworkFragment extends BaseFragment implements LogIns
      * Returns true if any server hostname was configured in settings
      */
     private boolean isServerConfigured() {
-        SharedPreferences prefs = PreferenceManagerFix.getDefaultSharedPreferences(getActivity());
+        SharedPreferences prefs = PreferenceManagerFix.getDefaultSharedPreferences(Objects.requireNonNull(getActivity()));
         return !prefs.getString("host", "").isEmpty();
     }
 

@@ -3,7 +3,6 @@ package de.tu_darmstadt.seemoo.nfcgate.gui;
 import android.content.Intent;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
-import android.nfc.Tag;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,6 +21,7 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.SessionLog;
@@ -62,12 +62,9 @@ public class MainActivity extends AppCompatActivity {
 
         // drawer toggle in toolbar
         mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.empty, R.string.empty);
-        mToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // when drawer icon is NOT visible (due to fragment on backstack), issue back action
-                onBackPressed();
-            }
+        mToggle.setToolbarNavigationClickListener(v -> {
+            // when drawer icon is NOT visible (due to fragment on backstack), issue back action
+            onBackPressed();
         });
         mDrawerLayout.addDrawerListener(mToggle);
 
@@ -75,30 +72,24 @@ public class MainActivity extends AppCompatActivity {
         final FragmentManager fragmentManager = getSupportFragmentManager();
         final ActionBar actionBar = getSupportActionBar();
 
-        fragmentManager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-            @Override
-            public void onBackStackChanged() {
-                if (fragmentManager.getBackStackEntryCount() > 0) {
-                    // https://stackoverflow.com/a/29594947
-                    actionBar.setDisplayHomeAsUpEnabled(false);
-                    mToggle.setDrawerIndicatorEnabled(false);
-                    actionBar.setDisplayHomeAsUpEnabled(true);
-                } else {
-                    actionBar.setDisplayHomeAsUpEnabled(false);
-                    mToggle.setDrawerIndicatorEnabled(true);
-                    mToggle.syncState();
-                }
+        fragmentManager.addOnBackStackChangedListener(() -> {
+            if (fragmentManager.getBackStackEntryCount() > 0) {
+                // https://stackoverflow.com/a/29594947
+                actionBar.setDisplayHomeAsUpEnabled(false);
+                mToggle.setDrawerIndicatorEnabled(false);
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            } else {
+                actionBar.setDisplayHomeAsUpEnabled(false);
+                mToggle.setDrawerIndicatorEnabled(true);
+                mToggle.syncState();
             }
         });
 
         // navbar setup actions
         mNavbar = findViewById(R.id.main_navigation);
-        mNavbar.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                onNavbarAction(item);
-                return true;
-            }
+        mNavbar.setNavigationItemSelectedListener(item -> {
+            onNavbarAction(item);
+            return true;
         });
 
         // initially select clone mode
@@ -131,9 +122,9 @@ public class MainActivity extends AppCompatActivity {
         // tech discovered is triggered by XML, tag discovered by foreground dispatch
         if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction()) ||
                 NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction()))
-            mNfc.onTagDiscovered(intent.<Tag>getParcelableExtra(NfcAdapter.EXTRA_TAG));
+            mNfc.onTagDiscovered(intent.getParcelableExtra(NfcAdapter.EXTRA_TAG));
         else if (Intent.ACTION_SEND.equals(intent.getAction()))
-            importPcap(intent.<Uri>getParcelableExtra(Intent.EXTRA_STREAM));
+            importPcap(intent.getParcelableExtra(Intent.EXTRA_STREAM));
         else if (Intent.ACTION_VIEW.equals(intent.getAction()))
             importPcap(intent.getData());
         else if ("de.tu_darmstadt.seemoo.nfcgate.daemoncall".equals(intent.getAction()))
@@ -195,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
 
         // for the looks
-        getSupportActionBar().setTitle(item.getTitle());
+        Objects.requireNonNull(getSupportActionBar()).setTitle(item.getTitle());
         // reset the subtitle because a fragment might have changed it
         getSupportActionBar().setSubtitle(null);
         // hide status bar
@@ -233,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         // reset the subtitle because a fragment might have changed it
-        getSupportActionBar().setSubtitle(null);
+        Objects.requireNonNull(getSupportActionBar()).setSubtitle(null);
 
         super.onBackPressed();
     }

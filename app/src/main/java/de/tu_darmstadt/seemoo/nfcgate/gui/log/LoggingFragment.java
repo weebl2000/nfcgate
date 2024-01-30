@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.SessionLog;
@@ -34,11 +35,10 @@ public class LoggingFragment extends Fragment {
     ListView mLog;
     TextView mEmptyText;
     ActionMode mActionMode;
-    List<Integer> mActionSelections = new ArrayList<>();
+    final List<Integer> mActionSelections = new ArrayList<>();
 
     // db data
     private LogAction mLogAction;
-    private SessionLogViewModel mLogModel;
     private SessionLogListAdapter mLogAdapter;
 
     // callback
@@ -57,43 +57,34 @@ public class LoggingFragment extends Fragment {
         mLogAction = new LogAction(this);
 
         // setup db model
-        mLogModel = ViewModelProviders.of(this).get(SessionLogViewModel.class);
-        mLogModel.getSessionLogs().observe(this, new Observer<List<SessionLog>>() {
-            @Override
-            public void onChanged(@Nullable List<SessionLog> sessionLogs) {
-                mLogAdapter.clear();
-                mLogAdapter.addAll(sessionLogs);
-                mLogAdapter.notifyDataSetChanged();
+        SessionLogViewModel mLogModel = ViewModelProviders.of(this).get(SessionLogViewModel.class);
+        mLogModel.getSessionLogs().observe(this, sessionLogs -> {
+            mLogAdapter.clear();
+            mLogAdapter.addAll(sessionLogs);
+            mLogAdapter.notifyDataSetChanged();
 
-                // toggle empty message
-                setEmptyTextVisible(sessionLogs.isEmpty());
-            }
+            // toggle empty message
+            setEmptyTextVisible(sessionLogs.isEmpty());
         });
 
         // handlers
-        mLog.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position < 0)
-                    return;
+        mLog.setOnItemClickListener((parent, view, position, id) -> {
+            if (position < 0)
+                return;
 
-                if (mActionMode != null)
-                    toggleSelection(position);
-                else
-                    mCallback.onLogItemSelected(mLogAdapter.getItem(position).getId());
-            }
-        });
-        mLog.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position < 0 || mActionMode != null)
-                    return false;
-
-                mActionMode = getActivity().<Toolbar>findViewById(R.id.toolbar).startActionMode(new ActionModeCallback());
-                mActionMode.setTitle(getString(R.string.log_action));
+            if (mActionMode != null)
                 toggleSelection(position);
-                return true;
-            }
+            else
+                mCallback.onLogItemSelected(mLogAdapter.getItem(position).getId());
+        });
+        mLog.setOnItemLongClickListener((parent, view, position, id) -> {
+            if (position < 0 || mActionMode != null)
+                return false;
+
+            mActionMode = getActivity().<Toolbar>findViewById(R.id.toolbar).startActionMode(new ActionModeCallback());
+            mActionMode.setTitle(getString(R.string.log_action));
+            toggleSelection(position);
+            return true;
         });
 
         return v;
@@ -103,7 +94,7 @@ public class LoggingFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mLogAdapter = new SessionLogListAdapter(getActivity(), R.layout.list_log);
+        mLogAdapter = new SessionLogListAdapter(Objects.requireNonNull(getActivity()), R.layout.list_log);
         mLog.setAdapter(mLogAdapter);
     }
 
@@ -130,7 +121,7 @@ public class LoggingFragment extends Fragment {
         @Override
         public void onLogItemSelected(int sessionId) {
             // open detail view with log information
-            getFragmentManager().beginTransaction()
+            Objects.requireNonNull(getFragmentManager()).beginTransaction()
                     .replace(R.id.main_content, SessionLogEntryFragment.newInstance(sessionId, SessionLogEntryFragment.Type.VIEW, null), "log_entry")
                     .addToBackStack(null)
                     .commit();
@@ -164,12 +155,12 @@ public class LoggingFragment extends Fragment {
                     return true;
                 case R.id.action_share:
                     if (mActionSelections.size() == 1) {
-                        mLogAction.share(mLogAdapter.getItem(mActionSelections.get(0)));
+                        mLogAction.share(Objects.requireNonNull(mLogAdapter.getItem(mActionSelections.get(0))));
                         mode.finish();
                         return true;
                     }
                     else
-                        Toast.makeText(getActivity(), getActivity().getString(R.string.log_error_multiple), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), Objects.requireNonNull(getActivity()).getString(R.string.log_error_multiple), Toast.LENGTH_LONG).show();
             }
 
             return false;
@@ -213,7 +204,7 @@ public class LoggingFragment extends Fragment {
             final SessionLog entry = getItem(position);
 
             // set image indicating relay, replay, capture
-            v.<ImageView>findViewById(R.id.type).setImageResource(byType(entry.getType()));
+            v.<ImageView>findViewById(R.id.type).setImageResource(byType(Objects.requireNonNull(entry).getType()));
             // set title to date
             v.<TextView>findViewById(R.id.title).setText(entry.getDate().toString());
             // color selected items

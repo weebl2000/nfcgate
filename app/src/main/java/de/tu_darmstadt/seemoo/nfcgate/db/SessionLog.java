@@ -9,7 +9,7 @@ import java.util.Date;
 
 @Entity
 public class SessionLog {
-    public static SimpleDateFormat ISO_DATE = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    public static final SimpleDateFormat ISO_DATE = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     public enum SessionType {
         RELAY,

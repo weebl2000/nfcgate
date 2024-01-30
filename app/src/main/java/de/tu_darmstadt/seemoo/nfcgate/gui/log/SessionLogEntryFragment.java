@@ -23,6 +23,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.NfcCommEntry;
@@ -49,15 +50,13 @@ public class SessionLogEntryFragment extends Fragment {
     // UI references
     ListView mLogEntries;
 
-    // db data
-    private SessionLogEntryViewModel mLogEntryModel;
     private SessionLogEntryListAdapter mLogEntriesAdapter;
     private long mSessionId;
     private Type mType;
 
     // current data
     private LogAction mLogAction;
-    private List<NfcComm> mLogData = new ArrayList<>();
+    private final List<NfcComm> mLogData = new ArrayList<>();
     private SessionLog mSessionLog;
 
     // callback
@@ -96,39 +95,37 @@ public class SessionLogEntryFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        final ActionBar actionBar = ((AppCompatActivity) Objects.requireNonNull(getActivity())).getSupportActionBar();
         // view requires a back button
         if (mType == Type.VIEW) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
+            Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowHomeEnabled(true);
         }
 
         // setup db model
-        mLogEntryModel = ViewModelProviders.of(this, new SessionLogEntryViewModelFactory(getActivity().getApplication(), mSessionId))
+        // db data
+        SessionLogEntryViewModel mLogEntryModel = ViewModelProviders.of(this, new SessionLogEntryViewModelFactory(getActivity().getApplication(), mSessionId))
                 .get(SessionLogEntryViewModel.class);
 
-        mLogEntryModel.getSession().observe(this, new Observer<SessionLogJoin>() {
-            @Override
-            public void onChanged(@Nullable SessionLogJoin sessionLogJoin) {
-                mLogEntriesAdapter.clear();
-                mLogData.clear();
+        mLogEntryModel.getSession().observe(this, sessionLogJoin -> {
+            mLogEntriesAdapter.clear();
+            mLogData.clear();
 
-                if (sessionLogJoin != null) {
-                    // save current log data
-                    mSessionLog = sessionLogJoin.getSessionLog();
-                    for (NfcCommEntry nfcCommEntry : sessionLogJoin.getNfcCommEntries())
-                        mLogData.add(nfcCommEntry.getNfcComm());
+            if (sessionLogJoin != null) {
+                // save current log data
+                mSessionLog = sessionLogJoin.getSessionLog();
+                for (NfcCommEntry nfcCommEntry : sessionLogJoin.getNfcCommEntries())
+                    mLogData.add(nfcCommEntry.getNfcComm());
 
-                    // add log data to list adapter
-                    mLogEntriesAdapter.addAll(mLogData);
-                    mLogEntriesAdapter.notifyDataSetChanged();
+                // add log data to list adapter
+                mLogEntriesAdapter.addAll(mLogData);
+                mLogEntriesAdapter.notifyDataSetChanged();
 
-                    // live requires autoscroll, view and select require subtitle
-                    if (mType == Type.LIVE)
-                        mLogEntries.setSelection(mLogEntriesAdapter.getCount() - 1);
-                    else
-                        actionBar.setSubtitle(mSessionLog.toString());
-                }
+                // live requires autoscroll, view and select require subtitle
+                if (mType == Type.LIVE)
+                    mLogEntries.setSelection(mLogEntriesAdapter.getCount() - 1);
+                else
+                    actionBar.setSubtitle(mSessionLog.toString());
             }
         });
 
@@ -152,7 +149,7 @@ public class SessionLogEntryFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case android.R.id.home:
-                getActivity().onBackPressed();
+                Objects.requireNonNull(getActivity()).onBackPressed();
                 return true;
             case R.id.action_yes:
                 mCallback.onLogSelected(mSessionId);
@@ -162,7 +159,7 @@ public class SessionLogEntryFragment extends Fragment {
                 return true;
             case R.id.action_delete:
                 mLogAction.delete(mSessionLog);
-                getActivity().onBackPressed();
+                Objects.requireNonNull(getActivity()).onBackPressed();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -189,7 +186,7 @@ public class SessionLogEntryFragment extends Fragment {
             final NfcComm comm = getItem(position);
 
             // set image indicating card or reader
-            v.<ImageView>findViewById(R.id.type).setImageResource(byCard(comm.isCard()));
+            v.<ImageView>findViewById(R.id.type).setImageResource(byCard(Objects.requireNonNull(comm).isCard()));
             // set content to either config stream or binary content
             v.<TextView>findViewById(R.id.data).setText(byInitial(comm.isInitial(), comm.getData()));
             // set timestamp

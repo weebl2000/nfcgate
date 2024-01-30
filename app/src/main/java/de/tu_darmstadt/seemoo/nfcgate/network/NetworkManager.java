@@ -23,9 +23,9 @@ public class NetworkManager implements ServerConnection.Callback {
     }
 
     // references
-    private MainActivity mActivity;
+    private final MainActivity mActivity;
     private ServerConnection mConnection;
-    private Callback mCallback;
+    private final Callback mCallback;
 
     // preference data
     private String mHostname;
@@ -68,7 +68,7 @@ public class NetworkManager implements ServerConnection.Callback {
 
     @Override
     public void onReceive(byte[] data) {
-        C2S.ServerData serverData = null;
+        C2S.ServerData serverData;
         try {
             serverData = C2S.ServerData.parseFrom(data);
         } catch (InvalidProtocolBufferException e) {

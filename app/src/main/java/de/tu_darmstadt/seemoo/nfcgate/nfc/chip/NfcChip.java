@@ -44,6 +44,7 @@ public class NfcChip {
 
         for (INfcChipDetector detector : detectors)
             result.addAll(detector.tryDetect());
+
         return result;
     }
 }

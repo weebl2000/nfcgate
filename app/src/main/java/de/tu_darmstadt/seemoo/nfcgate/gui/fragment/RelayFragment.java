@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Objects;
+
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.SessionLog;
 import de.tu_darmstadt.seemoo.nfcgate.db.worker.LogInserter;
@@ -22,7 +24,7 @@ public class RelayFragment extends BaseNetworkFragment {
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
         // set relay action text
-        v.<TextView>findViewById(R.id.txt_action).setText(getString(R.string.relay_action));
+        Objects.requireNonNull(v).<TextView>findViewById(R.id.txt_action).setText(getString(R.string.relay_action));
 
         return v;
     }
@@ -75,12 +77,7 @@ public class RelayFragment extends BaseNetworkFragment {
             mLogInserter.log(data);
 
             // hide wait indicator
-            runOnUI(new Runnable() {
-                @Override
-                public void run() {
-                    setTagWaitVisible(false, false);
-                }
-            });
+            runOnUI(() -> setTagWaitVisible(false, false));
 
             // forward data to NFC or network
             super.onData(isForeign, data);
@@ -91,12 +88,7 @@ public class RelayFragment extends BaseNetworkFragment {
             super.onNetworkStatus(status);
 
             // report status
-            runOnUI(new Runnable() {
-                @Override
-                public void run() {
-                    handleStatus(status);
-                }
-            });
+            runOnUI(() -> handleStatus(status));
         }
     }
 }
