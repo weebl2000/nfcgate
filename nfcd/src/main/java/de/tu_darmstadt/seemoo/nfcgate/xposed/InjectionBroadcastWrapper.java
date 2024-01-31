@@ -104,7 +104,13 @@ public class InjectionBroadcastWrapper extends BroadcastReceiver {
         }
 
         // try to load the library
-        System.load(libPath);
+        Log.i("HOOKNFC", "Trying to load library from path: " + libPath);
+        try {
+            System.load(libPath);
+            Log.i("HOOKNFC", "Loading library did not throw any exceptions.");
+        } catch (Throwable t) {
+            Log.e("HOOKNFC",  "Exception loading library: " + t.getMessage(), t);
+        }
     }
 
     private String combinePath(String p1, String p2) {
