@@ -232,25 +232,22 @@ public class Hooks implements IXposedHookLoadPackage {
         PackageManager pm = ctx.getPackageManager();
 
         // find our foreign source directory
-        String sourceDir;
         try {
-            sourceDir = pm.getPackageInfo(sourcePackage, 0).applicationInfo.sourceDir;
+            final String sourceDir = pm.getPackageInfo(sourcePackage, 0).applicationInfo.sourceDir;
+            // add our sources to the target's class loader and
+            // create injected class using target loader and instance it with context
+            try {
+                Method adp = target.getClass().getMethod("addDexPath", String.class);
+                adp.invoke(target, sourceDir);
+
+                return loadClass(ctx, target, injectClass);
+            } catch (Exception e) {
+                Log.e("HOOKNFC", "Failed to construct injected class", e);
+                return null;
+            }
         } catch (PackageManager.NameNotFoundException e) {
             Log.e("HOOKNFC", "Failed to find source package " + sourcePackage);
             return null;
         }
-
-        // add our sources to the target's class loader and
-        // create injected class using target loader and instance it with context
-        try {
-            Method adp = target.getClass().getMethod("addDexPath", String.class);
-            adp.invoke(target, sourceDir);
-
-            return loadClass(ctx, target, injectClass);
-        } catch (Exception e) {
-            Log.e("HOOKNFC", "Failed to construct injected class", e);
-        }
-
-        return null;
     }
 }
