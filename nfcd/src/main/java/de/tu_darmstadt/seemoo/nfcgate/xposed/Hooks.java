@@ -182,9 +182,8 @@ public class Hooks implements IXposedHookLoadPackage {
             return (boolean)mReceiver.getClass().getMethod("isPatchEnabled").invoke(mReceiver);
         } catch (Exception e) {
             Log.e("HOOKNFC", "Failed to get isPatchEnabled", e);
+            return false;
         }
-
-        return false;
     }
 
     private boolean isCaptureEnabled() {
@@ -192,9 +191,8 @@ public class Hooks implements IXposedHookLoadPackage {
             return (boolean)mReceiver.getClass().getMethod("isCaptureEnabled").invoke(mReceiver);
         } catch (Exception e) {
             Log.e("HOOKNFC", "Failed to get isCaptureEnabled", e);
+            return false;
         }
-
-        return false;
     }
 
     private void addCapture(Bundle capture) {
@@ -226,8 +224,8 @@ public class Hooks implements IXposedHookLoadPackage {
             return loaded.getConstructor(Context.class).newInstance(ctx);
         } catch (Exception e) {
             Log.e("HOOKNFC", "Failed to construct loaded class", e);
+            return null;
         }
-        return null;
     }
 
     private Object injectClass(Context ctx, String sourcePackage, ClassLoader target, String injectClass) {
