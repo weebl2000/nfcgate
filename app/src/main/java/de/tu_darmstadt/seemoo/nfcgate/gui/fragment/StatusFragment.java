@@ -158,9 +158,7 @@ public class StatusFragment extends BaseFragment {
 
     StatusItem detectBuildNumber() {
         // build number
-        StatusItem result = new StatusItem(getContext(), getString(R.string.status_build)).setValue(Build.DISPLAY);
-
-        return result;
+        return new StatusItem(getContext(), getString(R.string.status_build)).setValue(Build.DISPLAY);
     }
 
     StatusItem detectNfcEnabled() {
