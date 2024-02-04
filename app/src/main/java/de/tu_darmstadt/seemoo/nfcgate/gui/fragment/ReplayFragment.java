@@ -60,8 +60,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
 
     @Override
     public void onDestroyView() {
-        if (mLoggingFragment != null)
-            setSessionSelectionVisible(false);
+        setSessionSelectionVisible(false);
 
         if (mDetailFragment != null)
             setSessionChooserVisible(false, 0);
