@@ -107,7 +107,7 @@ public class InjectionBroadcastWrapper extends BroadcastReceiver {
         System.load(libPath);
     }
 
-    private String combinePath(String p1, String p2) {
-        return p1 + (p1.endsWith("/") ? "" : "/") + p2;
+    private static String combinePath(String p1, String p2) {
+        return String.format("%s/%s", p1, p2).replaceAll("/{2}", "/");
     }
 }
