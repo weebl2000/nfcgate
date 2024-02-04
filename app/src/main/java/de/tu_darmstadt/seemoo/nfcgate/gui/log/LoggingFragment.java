@@ -37,7 +37,6 @@ public class LoggingFragment extends Fragment {
 
     // db data
     private LogAction mLogAction;
-    private SessionLogViewModel mLogModel;
     private SessionLogListAdapter mLogAdapter;
 
     // callback
