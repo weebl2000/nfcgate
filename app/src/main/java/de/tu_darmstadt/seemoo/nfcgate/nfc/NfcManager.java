@@ -174,6 +174,7 @@ public class NfcManager implements NfcAdapter.ReaderCallback, NetworkManager.Cal
      */
     public void onResume() {
         setBroadcastReceiverEnabled(true);
+        mDaemon.onResume();
 
         if (isEnabled()) {
             enableForegroundDispatch();
