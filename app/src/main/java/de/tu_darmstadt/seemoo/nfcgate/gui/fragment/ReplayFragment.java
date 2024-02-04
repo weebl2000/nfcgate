@@ -48,7 +48,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
         // set relay action text
-        v.<TextView>findViewById(R.id.txt_action).setText(getString(R.string.replay_action));
+        Objects.requireNonNull(v).<TextView>findViewById(R.id.txt_action).setText(getString(R.string.replay_action));
 
         // setup log item callback
         mLoggingFragment.setLogItemSelectedCallback(this);
@@ -77,7 +77,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
         mLogInserter = new LogInserter(getActivity(), SessionLog.SessionType.REPLAY, this);
 
         // get preference data
-        SharedPreferences prefs = PreferenceManagerFix.getDefaultSharedPreferences(getActivity());
+        SharedPreferences prefs = PreferenceManagerFix.getDefaultSharedPreferences(Objects.requireNonNull(getActivity()));
         mOfflineReplay = !prefs.getBoolean("network", false);
         mReplayMode = prefs.getString("mode", "index");
         mStatusBanner.setVisibility(!mOfflineReplay);
@@ -95,13 +95,13 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
     @Override
     public void onLogSelected(long sessionId) {
         // set subtitle
-        getMainActivity().getSupportActionBar().setSubtitle(getString(R.string.replay_session, sessionId));
+        Objects.requireNonNull(getMainActivity().getSupportActionBar()).setSubtitle(getString(R.string.replay_session, sessionId));
 
         // hide details chooser
         setSessionChooserVisible(false, -1);
 
         // load session data
-        ViewModelProviders.of(this, new SessionLogEntryViewModelFactory(getActivity().getApplication(), sessionId))
+        ViewModelProviders.of(this, new SessionLogEntryViewModelFactory(Objects.requireNonNull(getActivity()).getApplication(), sessionId))
                 .get(SessionLogEntryViewModel.class)
                 .getSession()
                 .observe(this, new Observer<SessionLogJoin>() {
@@ -141,7 +141,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
             mReplayer.reset();
 
         // clear subtitle
-        getMainActivity().getSupportActionBar().setSubtitle(getString(R.string.replay_session_select));
+        Objects.requireNonNull(getMainActivity().getSupportActionBar()).setSubtitle(getString(R.string.replay_session_select));
     }
 
     protected void onSelect(boolean reader) {

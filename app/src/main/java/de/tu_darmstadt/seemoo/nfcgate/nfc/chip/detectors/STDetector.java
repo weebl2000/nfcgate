@@ -4,6 +4,7 @@ import android.util.Pair;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,6 +56,6 @@ public class STDetector extends BaseConfigLineDetector {
         Matcher matcher = pattern.matcher(firmware);
 
         return matcher.lookingAt() && matcher.groupCount() > 0 ?
-                matcher.group(1).toUpperCase() : null;
+                Objects.requireNonNull(matcher.group(1)).toUpperCase() : null;
     }
 }

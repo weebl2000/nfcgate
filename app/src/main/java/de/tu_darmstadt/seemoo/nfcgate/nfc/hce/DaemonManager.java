@@ -1,7 +1,8 @@
 package de.tu_darmstadt.seemoo.nfcgate.nfc.hce;
 
 import android.content.Intent;
-import android.os.Bundle;
+
+import java.util.Objects;
 
 import de.tu_darmstadt.seemoo.nfcgate.gui.MainActivity;
 
@@ -23,9 +24,9 @@ public class DaemonManager {
     public void onResponse(Intent intent) {
         String responseType = intent.getStringExtra("type");
 
-        if ("CAPTURE".equals(responseType))
-            mActivity.importCapture(intent.<Bundle>getParcelableArrayListExtra("capture"));
-        else if ("HOOK_STATUS".equals(responseType)) {
+        if ("CAPTURE".equals(responseType)) {
+            mActivity.importCapture(Objects.requireNonNull(intent.getParcelableArrayListExtra("capture")));
+        } else if ("HOOK_STATUS".equals(responseType)) {
             mIsHookEnabled = intent.getBooleanExtra("hookEnabled", false);
             mActivity.getNfc().notifyStatusChanged();
         }

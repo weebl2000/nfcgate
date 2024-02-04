@@ -10,6 +10,8 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.util.Log;
 
+import java.util.Objects;
+
 import de.tu_darmstadt.seemoo.nfcgate.gui.MainActivity;
 import de.tu_darmstadt.seemoo.nfcgate.network.NetworkManager;
 import de.tu_darmstadt.seemoo.nfcgate.network.data.NetworkStatus;
@@ -31,7 +33,7 @@ public class NfcManager implements NfcAdapter.ReaderCallback, NetworkManager.Cal
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(NfcAdapter.ACTION_ADAPTER_STATE_CHANGED))
+            if (Objects.requireNonNull(intent.getAction()).equals(NfcAdapter.ACTION_ADAPTER_STATE_CHANGED))
                     notifyStatusChanged();
         }
     };

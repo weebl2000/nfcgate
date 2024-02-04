@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.jaredrummler.android.device.DeviceName;
 
+import java.util.Objects;
 
 import de.tu_darmstadt.seemoo.nfcgate.BuildConfig;
 import de.tu_darmstadt.seemoo.nfcgate.R;
@@ -45,7 +46,7 @@ public class StatusFragment extends BaseFragment {
         // custom toolbar actions
         setHasOptionsMenu(true);
         // set version as subtitle
-        getMainActivity().getSupportActionBar().setSubtitle(getString(R.string.about_version, BuildConfig.VERSION_NAME));
+        Objects.requireNonNull(getMainActivity().getSupportActionBar()).setSubtitle(getString(R.string.about_version, BuildConfig.VERSION_NAME));
 
         // handlers
         mStatus.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -65,8 +66,8 @@ public class StatusFragment extends BaseFragment {
                 if (position >= 0) {
                     final StatusItem item = mStatusAdapter.getItem(position);
 
-                    if (item.getState() != StatusItem.State.OK) {
-                        new AlertDialog.Builder(getActivity())
+                    if (Objects.requireNonNull(item).getState() != StatusItem.State.OK) {
+                        new AlertDialog.Builder(Objects.requireNonNull(getActivity()))
                                 .setTitle(getString(item.getState() == StatusItem.State.WARN ?
                                         R.string.status_warning : R.string.status_error))
                                 .setPositiveButton(getString(R.string.button_ok), null)
@@ -85,7 +86,7 @@ public class StatusFragment extends BaseFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mStatusAdapter = new StatusListAdapter(getActivity(), R.layout.list_status);
+        mStatusAdapter = new StatusListAdapter(Objects.requireNonNull(getActivity()), R.layout.list_status);
         mStatus.setAdapter(mStatusAdapter);
 
         detect();
@@ -111,7 +112,7 @@ public class StatusFragment extends BaseFragment {
     void exportData() {
         final StringBuilder str = new StringBuilder();
         for (int i = 0; i < mStatusAdapter.getCount();  i++)
-            str.append(str.length() == 0 ? "" : "\n").append(mStatusAdapter.getItem(i).toString());
+            str.append(str.length() == 0 ? "" : "\n").append(Objects.requireNonNull(mStatusAdapter.getItem(i)));
 
         new FileShare(getActivity())
                 .setPrefix("config")
@@ -249,7 +250,7 @@ public class StatusFragment extends BaseFragment {
             View v = super.getView(position, convertView, parent);
             final StatusItem item = getItem(position);
 
-            v.<TextView>findViewById(R.id.status_name).setText(item.getName());
+            v.<TextView>findViewById(R.id.status_name).setText(Objects.requireNonNull(item).getName());
             v.<TextView>findViewById(R.id.status_value).setText(item.getValue());
             v.<ImageView>findViewById(R.id.status_icon).setImageResource(byState(item.getState()));
 

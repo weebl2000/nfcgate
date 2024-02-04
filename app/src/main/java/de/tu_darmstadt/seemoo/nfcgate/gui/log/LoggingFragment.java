@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.SessionLog;
@@ -92,7 +93,7 @@ public class LoggingFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mLogAdapter = new SessionLogListAdapter(getActivity(), R.layout.list_log);
+        mLogAdapter = new SessionLogListAdapter(Objects.requireNonNull(getActivity()), R.layout.list_log);
         mLog.setAdapter(mLogAdapter);
     }
 
@@ -119,7 +120,7 @@ public class LoggingFragment extends Fragment {
         @Override
         public void onLogItemSelected(int sessionId) {
             // open detail view with log information
-            getFragmentManager().beginTransaction()
+            Objects.requireNonNull(getFragmentManager()).beginTransaction()
                     .replace(R.id.main_content, SessionLogEntryFragment.newInstance(sessionId, SessionLogEntryFragment.Type.VIEW, null), "log_entry")
                     .addToBackStack(null)
                     .commit();
@@ -153,12 +154,12 @@ public class LoggingFragment extends Fragment {
                     return true;
                 case R.id.action_share:
                     if (mActionSelections.size() == 1) {
-                        mLogAction.share(mLogAdapter.getItem(mActionSelections.get(0)));
+                        mLogAction.share(Objects.requireNonNull(mLogAdapter.getItem(mActionSelections.get(0))));
                         mode.finish();
                         return true;
                     }
                     else
-                        Toast.makeText(getActivity(), getActivity().getString(R.string.log_error_multiple), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), Objects.requireNonNull(getActivity()).getString(R.string.log_error_multiple), Toast.LENGTH_LONG).show();
             }
 
             return false;
@@ -202,7 +203,7 @@ public class LoggingFragment extends Fragment {
             final SessionLog entry = getItem(position);
 
             // set image indicating relay, replay, capture
-            v.<ImageView>findViewById(R.id.type).setImageResource(byType(entry.getType()));
+            v.<ImageView>findViewById(R.id.type).setImageResource(byType(Objects.requireNonNull(entry).getType()));
             // set title to date
             v.<TextView>findViewById(R.id.title).setText(entry.getDate().toString());
             // color selected items
