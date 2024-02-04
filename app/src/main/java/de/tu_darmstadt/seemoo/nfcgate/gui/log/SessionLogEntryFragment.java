@@ -27,7 +27,6 @@ import java.util.Objects;
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.NfcCommEntry;
 import de.tu_darmstadt.seemoo.nfcgate.db.SessionLog;
-import de.tu_darmstadt.seemoo.nfcgate.db.SessionLogJoin;
 import de.tu_darmstadt.seemoo.nfcgate.db.model.SessionLogEntryViewModel;
 import de.tu_darmstadt.seemoo.nfcgate.db.model.SessionLogEntryViewModelFactory;
 import de.tu_darmstadt.seemoo.nfcgate.gui.component.CustomArrayAdapter;
@@ -49,8 +48,6 @@ public class SessionLogEntryFragment extends Fragment {
     // UI references
     ListView mLogEntries;
 
-    // db data
-    private SessionLogEntryViewModel mLogEntryModel;
     private SessionLogEntryListAdapter mLogEntriesAdapter;
     private long mSessionId;
     private Type mType;
@@ -104,7 +101,8 @@ public class SessionLogEntryFragment extends Fragment {
         }
 
         // setup db model
-        mLogEntryModel = ViewModelProviders.of(this, new SessionLogEntryViewModelFactory(getActivity().getApplication(), mSessionId))
+        // db data
+        final SessionLogEntryViewModel mLogEntryModel = ViewModelProviders.of(this, new SessionLogEntryViewModelFactory(getActivity().getApplication(), mSessionId))
                 .get(SessionLogEntryViewModel.class);
 
         mLogEntryModel.getSession().observe(this, sessionLogJoin -> {
