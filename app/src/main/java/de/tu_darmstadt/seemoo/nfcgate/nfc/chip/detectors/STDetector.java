@@ -2,7 +2,7 @@ package de.tu_darmstadt.seemoo.nfcgate.nfc.chip.detectors;
 
 import android.util.Pair;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -19,7 +19,7 @@ import de.tu_darmstadt.seemoo.nfcgate.nfc.chip.NfcChipGuess;
 public class STDetector extends BaseConfigLineDetector {
     @Override
     protected List<String> getConfigFilenames() {
-        return Arrays.asList("libnfc-hal-st.conf");
+        return Collections.singletonList("libnfc-hal-st.conf");
     }
 
     @Override

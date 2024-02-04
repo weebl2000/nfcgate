@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -83,7 +84,7 @@ public class NXPOppoDetector extends NXPDetector {
      * This file contains the nfc config file associations
      */
     String getConfRefPath() {
-        List<String> candidates = findConfigs(Arrays.asList("nfc_conf_ref"));
+        List<String> candidates = findConfigs(Collections.singletonList("nfc_conf_ref"));
         return !candidates.isEmpty() ? candidates.get(0) : null;
     }
 
