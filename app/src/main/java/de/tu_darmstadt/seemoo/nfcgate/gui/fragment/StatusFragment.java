@@ -214,13 +214,11 @@ public class StatusFragment extends BaseFragment {
         // null or chip model name
         final String chipName = NfcChip.detect();
         // Chip model should be OK if it can be detected
-        StatusItem result = new StatusItem(getContext(), getString(R.string.status_chip))
+        final StatusItem result = new StatusItem(getContext(), getString(R.string.status_chip))
                 .setValue(chipName != null ? chipName : getString(R.string.status_unknown));
 
-        if (chipName == null) {
+        if (chipName == null)
             result.setWarn(getString(R.string.warn_NFCMOD));
-            return result;
-        }
 
         return result;
     }
