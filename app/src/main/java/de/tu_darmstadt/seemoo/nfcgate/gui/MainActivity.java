@@ -20,7 +20,6 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.SessionLog;
@@ -121,9 +120,9 @@ public class MainActivity extends AppCompatActivity {
         // tech discovered is triggered by XML, tag discovered by foreground dispatch
         if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction()) ||
                 NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction()))
-            mNfc.onTagDiscovered(intent.getParcelableExtra(NfcAdapter.EXTRA_TAG));
+            mNfc.onTagDiscovered(intent.<Tag>getParcelableExtra(NfcAdapter.EXTRA_TAG));
         else if (Intent.ACTION_SEND.equals(intent.getAction()))
-            importPcap(intent.getParcelableExtra(Intent.EXTRA_STREAM));
+            importPcap(intent.<Uri>getParcelableExtra(Intent.EXTRA_STREAM));
         else if (Intent.ACTION_VIEW.equals(intent.getAction()))
             importPcap(intent.getData());
         else if ("de.tu_darmstadt.seemoo.nfcgate.daemoncall".equals(intent.getAction()))
@@ -185,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
 
         // for the looks
-        Objects.requireNonNull(getSupportActionBar()).setTitle(item.getTitle());
+        getSupportActionBar().setTitle(item.getTitle());
         // reset the subtitle because a fragment might have changed it
         getSupportActionBar().setSubtitle(null);
         // hide status bar
@@ -223,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         // reset the subtitle because a fragment might have changed it
-        Objects.requireNonNull(getSupportActionBar()).setSubtitle(null);
+        getSupportActionBar().setSubtitle(null);
 
         super.onBackPressed();
     }

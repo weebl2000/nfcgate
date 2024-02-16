@@ -9,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.Objects;
-
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.SessionLog;
 import de.tu_darmstadt.seemoo.nfcgate.db.worker.LogInserter;
@@ -24,7 +22,7 @@ public class RelayFragment extends BaseNetworkFragment {
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
         // set relay action text
-        Objects.requireNonNull(v).<TextView>findViewById(R.id.txt_action).setText(getString(R.string.relay_action));
+        v.<TextView>findViewById(R.id.txt_action).setText(getString(R.string.relay_action));
 
         return v;
     }

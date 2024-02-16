@@ -17,8 +17,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.Objects;
-
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.worker.LogInserter;
 import de.tu_darmstadt.seemoo.nfcgate.gui.component.StatusBanner;
@@ -122,7 +120,7 @@ public abstract class BaseNetworkFragment extends BaseFragment implements LogIns
      */
     private boolean isNetworkAvailable() {
         ConnectivityManager cm =
-                (ConnectivityManager) Objects.requireNonNull(getActivity()).getSystemService(Context.CONNECTIVITY_SERVICE);
+                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnected();
     }
@@ -131,7 +129,7 @@ public abstract class BaseNetworkFragment extends BaseFragment implements LogIns
      * Returns true if any server hostname was configured in settings
      */
     private boolean isServerConfigured() {
-        SharedPreferences prefs = PreferenceManagerFix.getDefaultSharedPreferences(Objects.requireNonNull(getActivity()));
+        SharedPreferences prefs = PreferenceManagerFix.getDefaultSharedPreferences(getActivity());
         return !prefs.getString("host", "").isEmpty();
     }
 

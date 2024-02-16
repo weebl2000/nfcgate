@@ -4,7 +4,6 @@ import android.util.Pair;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,6 +51,6 @@ public class SamsungDetector extends BaseConfigLineDetector {
         Matcher matcher = pattern.matcher(firmware);
 
         return matcher.lookingAt() && matcher.groupCount() > 0 ?
-                Objects.requireNonNull(matcher.group(1)).toUpperCase() : null;
+                matcher.group(1).toUpperCase() : null;
     }
 }

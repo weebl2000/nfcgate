@@ -21,7 +21,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.Objects;
+import java.util.List;
 
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.TagInfo;
@@ -95,7 +95,7 @@ public class CloneFragment extends BaseFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mTagInfoAdapter = new ArrayAdapter<>(Objects.requireNonNull(getActivity()), android.R.layout.simple_list_item_1);
+        mTagInfoAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1);
         mCloneSaved.setAdapter(mTagInfoAdapter);
 
         getNfc().setStatusChangedHandler(() -> {
@@ -142,13 +142,13 @@ public class CloneFragment extends BaseFragment {
         MenuItem item = menu.findItem(R.id.action_save);
         if (item != null) {
             item.setEnabled(enabled);
-            Objects.requireNonNull(item.getIcon()).mutate().setAlpha(enabled ? 255 : 130);
+            item.getIcon().mutate().setAlpha(enabled ? 255 : 130);
         }
     }
 
     private void setTagInfoDisplayed(boolean tagInfoDisplayed) {
         mTagInfoDisplayed = tagInfoDisplayed;
-        Objects.requireNonNull(getActivity()).invalidateOptionsMenu();
+        getActivity().invalidateOptionsMenu();
     }
 
     void setCloneWait(boolean waiting) {
