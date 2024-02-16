@@ -147,26 +147,19 @@ public class MainActivity extends AppCompatActivity {
      * Returns a Fragment for every navbar action
      */
     private Fragment getFragmentByAction(int id) {
-        switch (id) {
-            case R.id.nav_clone:
-                return new CloneFragment();
-            case R.id.nav_relay:
-                return new RelayFragment();
-            case R.id.nav_replay:
-                return new ReplayFragment();
-            case R.id.nav_capture:
-                return new CaptureFragment();
-            case R.id.nav_settings:
-                return new SettingsFragment();
-            case R.id.nav_status:
-                return new StatusFragment();
-            case R.id.nav_about:
-                return new AboutFragment();
-            case R.id.nav_logging:
-                return new LoggingFragment();
-            default:
-                throw new IllegalArgumentException("Position out of range");
+        final Fragment fragment = R.id.nav_clone == id ? new CloneFragment()
+                : R.id.nav_relay == id ? new RelayFragment()
+                : R.id.nav_replay == id ? new ReplayFragment()
+                : R.id.nav_capture == id ? new CaptureFragment()
+                : R.id.nav_settings == id ? new SettingsFragment()
+                : R.id.nav_status == id ? new StatusFragment()
+                : R.id.nav_about == id ? new AboutFragment()
+                : R.id.nav_logging == id ? new LoggingFragment() : null;
+
+        if (fragment == null) {
+            throw new IllegalArgumentException("Position out of range");
         }
+        return fragment;
     }
 
     /**
