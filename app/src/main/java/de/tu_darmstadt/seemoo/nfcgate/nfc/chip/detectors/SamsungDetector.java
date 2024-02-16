@@ -2,7 +2,7 @@ package de.tu_darmstadt.seemoo.nfcgate.nfc.chip.detectors;
 
 import android.util.Pair;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,7 +18,7 @@ import de.tu_darmstadt.seemoo.nfcgate.nfc.chip.NfcChipGuess;
 public class SamsungDetector extends BaseConfigLineDetector {
     @Override
     protected List<String> getConfigFilenames() {
-        return Collections.singletonList("libnfc-sec-vendor.conf");
+        return Arrays.asList("libnfc-sec-vendor.conf");
     }
 
     @Override
