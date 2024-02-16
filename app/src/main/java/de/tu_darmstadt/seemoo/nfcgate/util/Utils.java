@@ -6,8 +6,8 @@ public class Utils {
 
     /**
      * Convert a byte-array to a hexadecimal String.
-     * <p>
-     * <a href="from">https://stackoverflow.com/a/9855338/207861</a>
+     *
+     * from https://stackoverflow.com/a/9855338/207861
      *
      * @param bytes Byte[] to convert to String
      * @return Byte[] as hex-string
@@ -27,7 +27,7 @@ public class Utils {
 
     /**
      * Convert a byte-array to a multiline hexdump String.
-     * <p>
+     *
      * Every line is prefixed with the hex offset, e.g.:
      * 000 01 02 03 ...
      * 010 10 20 30 ...
