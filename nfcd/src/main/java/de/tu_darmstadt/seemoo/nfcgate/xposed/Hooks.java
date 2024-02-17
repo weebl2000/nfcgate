@@ -214,9 +214,8 @@ public class Hooks implements IXposedHookLoadPackage {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             return injectClass(ctx, sourcePackage, target, className);
-        } else {
+        } else
             return loadClass(ctx, current, className);
-        }
     }
 
     private Object loadClass(Context ctx, ClassLoader target, String loadClass) {
