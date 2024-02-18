@@ -1,6 +1,5 @@
 package de.tu_darmstadt.seemoo.nfcgate.gui.log;
 
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
@@ -27,7 +26,6 @@ import java.util.List;
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.NfcCommEntry;
 import de.tu_darmstadt.seemoo.nfcgate.db.SessionLog;
-import de.tu_darmstadt.seemoo.nfcgate.db.SessionLogJoin;
 import de.tu_darmstadt.seemoo.nfcgate.db.model.SessionLogEntryViewModel;
 import de.tu_darmstadt.seemoo.nfcgate.db.model.SessionLogEntryViewModelFactory;
 import de.tu_darmstadt.seemoo.nfcgate.gui.component.CustomArrayAdapter;
@@ -49,15 +47,13 @@ public class SessionLogEntryFragment extends Fragment {
     // UI references
     ListView mLogEntries;
 
-    // db data
-    private SessionLogEntryViewModel mLogEntryModel;
     private SessionLogEntryListAdapter mLogEntriesAdapter;
     private long mSessionId;
     private Type mType;
 
     // current data
     private LogAction mLogAction;
-    private List<NfcComm> mLogData = new ArrayList<>();
+    private final List<NfcComm> mLogData = new ArrayList<>();
     private SessionLog mSessionLog;
 
     // callback
@@ -104,31 +100,29 @@ public class SessionLogEntryFragment extends Fragment {
         }
 
         // setup db model
-        mLogEntryModel = ViewModelProviders.of(this, new SessionLogEntryViewModelFactory(getActivity().getApplication(), mSessionId))
+        // db data
+        final SessionLogEntryViewModel mLogEntryModel = ViewModelProviders.of(this, new SessionLogEntryViewModelFactory(getActivity().getApplication(), mSessionId))
                 .get(SessionLogEntryViewModel.class);
 
-        mLogEntryModel.getSession().observe(this, new Observer<SessionLogJoin>() {
-            @Override
-            public void onChanged(@Nullable SessionLogJoin sessionLogJoin) {
-                mLogEntriesAdapter.clear();
-                mLogData.clear();
+        mLogEntryModel.getSession().observe(this, sessionLogJoin -> {
+            mLogEntriesAdapter.clear();
+            mLogData.clear();
 
-                if (sessionLogJoin != null) {
-                    // save current log data
-                    mSessionLog = sessionLogJoin.getSessionLog();
-                    for (NfcCommEntry nfcCommEntry : sessionLogJoin.getNfcCommEntries())
-                        mLogData.add(nfcCommEntry.getNfcComm());
+            if (sessionLogJoin != null) {
+                // save current log data
+                mSessionLog = sessionLogJoin.getSessionLog();
+                for (NfcCommEntry nfcCommEntry : sessionLogJoin.getNfcCommEntries())
+                    mLogData.add(nfcCommEntry.getNfcComm());
 
-                    // add log data to list adapter
-                    mLogEntriesAdapter.addAll(mLogData);
-                    mLogEntriesAdapter.notifyDataSetChanged();
+                // add log data to list adapter
+                mLogEntriesAdapter.addAll(mLogData);
+                mLogEntriesAdapter.notifyDataSetChanged();
 
-                    // live requires autoscroll, view and select require subtitle
-                    if (mType == Type.LIVE)
-                        mLogEntries.setSelection(mLogEntriesAdapter.getCount() - 1);
-                    else
-                        actionBar.setSubtitle(mSessionLog.toString());
-                }
+                // live requires autoscroll, view and select require subtitle
+                if (mType == Type.LIVE)
+                    mLogEntries.setSelection(mLogEntriesAdapter.getCount() - 1);
+                else
+                    actionBar.setSubtitle(mSessionLog.toString());
             }
         });
 
@@ -150,25 +144,24 @@ public class SessionLogEntryFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
-            case android.R.id.home:
-                getActivity().onBackPressed();
-                return true;
-            case R.id.action_yes:
-                mCallback.onLogSelected(mSessionId);
-                return true;
-            case R.id.action_share:
-                mLogAction.share(mSessionLog, mLogData);
-                return true;
-            case R.id.action_delete:
-                mLogAction.delete(mSessionLog);
-                getActivity().onBackPressed();
-                return true;
+        if (android.R.id.home == item.getItemId()) {
+            getActivity().onBackPressed();
+            return true;
+        } else if (R.id.action_yes == item.getItemId()) {
+            mCallback.onLogSelected(mSessionId);
+            return true;
+        } else if (R.id.action_share == item.getItemId()) {
+            mLogAction.share(mSessionLog, mLogData);
+            return true;
+        } else if (R.id.action_delete == item.getItemId()) {
+            mLogAction.delete(mSessionLog);
+            getActivity().onBackPressed();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private class SessionLogEntryListAdapter extends CustomArrayAdapter<NfcComm> {
+    private static class SessionLogEntryListAdapter extends CustomArrayAdapter<NfcComm> {
         SessionLogEntryListAdapter(@NonNull Context context, int resource) {
             super(context, resource);
         }
@@ -193,7 +186,7 @@ public class SessionLogEntryFragment extends Fragment {
             // set content to either config stream or binary content
             v.<TextView>findViewById(R.id.data).setText(byInitial(comm.isInitial(), comm.getData()));
             // set timestamp
-            v.<TextView>findViewById(R.id.timestamp).setText(SessionLog.ISO_DATE.format(new Date(comm.getTimestamp())));
+            v.<TextView>findViewById(R.id.timestamp).setText(SessionLog.isoDateFormatter().format(new Date(comm.getTimestamp())));
 
             return v;
         }

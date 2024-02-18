@@ -45,18 +45,8 @@ public abstract class BaseNetworkFragment extends BaseFragment implements LogIns
         mStatusBanner = new StatusBanner(getMainActivity());
 
         // selector setup
-        v.<LinearLayout>findViewById(R.id.select_reader).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onSelect(true);
-            }
-        });
-        v.<LinearLayout>findViewById(R.id.select_tag).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onSelect(false);
-            }
-        });
+        v.<LinearLayout>findViewById(R.id.select_reader).setOnClickListener(view -> onSelect(true));
+        v.<LinearLayout>findViewById(R.id.select_tag).setOnClickListener(view -> onSelect(false));
 
         setHasOptionsMenu(true);
         reset();
@@ -71,12 +61,10 @@ public abstract class BaseNetworkFragment extends BaseFragment implements LogIns
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_refresh:
-                reset();
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.action_refresh) {
+            reset();
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

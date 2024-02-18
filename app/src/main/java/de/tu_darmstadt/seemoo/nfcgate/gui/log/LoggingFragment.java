@@ -1,6 +1,5 @@
 package de.tu_darmstadt.seemoo.nfcgate.gui.log;
 
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -34,11 +32,10 @@ public class LoggingFragment extends Fragment {
     ListView mLog;
     TextView mEmptyText;
     ActionMode mActionMode;
-    List<Integer> mActionSelections = new ArrayList<>();
+    final List<Integer> mActionSelections = new ArrayList<>();
 
     // db data
     private LogAction mLogAction;
-    private SessionLogViewModel mLogModel;
     private SessionLogListAdapter mLogAdapter;
 
     // callback
@@ -57,43 +54,34 @@ public class LoggingFragment extends Fragment {
         mLogAction = new LogAction(this);
 
         // setup db model
-        mLogModel = ViewModelProviders.of(this).get(SessionLogViewModel.class);
-        mLogModel.getSessionLogs().observe(this, new Observer<List<SessionLog>>() {
-            @Override
-            public void onChanged(@Nullable List<SessionLog> sessionLogs) {
-                mLogAdapter.clear();
-                mLogAdapter.addAll(sessionLogs);
-                mLogAdapter.notifyDataSetChanged();
+        SessionLogViewModel mLogModel = ViewModelProviders.of(this).get(SessionLogViewModel.class);
+        mLogModel.getSessionLogs().observe(this, sessionLogs -> {
+            mLogAdapter.clear();
+            mLogAdapter.addAll(sessionLogs);
+            mLogAdapter.notifyDataSetChanged();
 
-                // toggle empty message
-                setEmptyTextVisible(sessionLogs.isEmpty());
-            }
+            // toggle empty message
+            setEmptyTextVisible(sessionLogs.isEmpty());
         });
 
         // handlers
-        mLog.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position < 0)
-                    return;
+        mLog.setOnItemClickListener((parent, view, position, id) -> {
+            if (position < 0)
+                return;
 
-                if (mActionMode != null)
-                    toggleSelection(position);
-                else
-                    mCallback.onLogItemSelected(mLogAdapter.getItem(position).getId());
-            }
-        });
-        mLog.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position < 0 || mActionMode != null)
-                    return false;
-
-                mActionMode = getActivity().<Toolbar>findViewById(R.id.toolbar).startActionMode(new ActionModeCallback());
-                mActionMode.setTitle(getString(R.string.log_action));
+            if (mActionMode != null)
                 toggleSelection(position);
-                return true;
-            }
+            else
+                mCallback.onLogItemSelected(mLogAdapter.getItem(position).getId());
+        });
+        mLog.setOnItemLongClickListener((parent, view, position, id) -> {
+            if (position < 0 || mActionMode != null)
+                return false;
+
+            mActionMode = getActivity().<Toolbar>findViewById(R.id.toolbar).startActionMode(new ActionModeCallback());
+            mActionMode.setTitle(getString(R.string.log_action));
+            toggleSelection(position);
+            return true;
         });
 
         return v;

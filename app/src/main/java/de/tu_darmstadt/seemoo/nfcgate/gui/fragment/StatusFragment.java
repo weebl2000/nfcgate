@@ -20,8 +20,6 @@ import android.widget.TextView;
 
 import com.jaredrummler.android.device.DeviceName;
 
-import java.io.IOException;
-import java.io.OutputStream;
 
 import de.tu_darmstadt.seemoo.nfcgate.BuildConfig;
 import de.tu_darmstadt.seemoo.nfcgate.R;
@@ -101,13 +99,11 @@ public class StatusFragment extends BaseFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_export:
-                exportData();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.action_export) {
+            exportData();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     void exportData() {
@@ -119,12 +115,7 @@ public class StatusFragment extends BaseFragment {
                 .setPrefix("config")
                 .setExtension(".txt")
                 .setMimeType("text/plain")
-                .share(new FileShare.IFileShareable() {
-                    @Override
-                    public void write(OutputStream stream) throws IOException {
-                        stream.write(str.toString().getBytes());
-                    }
-                });
+                .share(stream -> stream.write(str.toString().getBytes()));
     }
 
     void detect() {
@@ -221,7 +212,7 @@ public class StatusFragment extends BaseFragment {
 
     StatusItem detectNfcModel() {
         // null or chip model name
-        String chipName = new NfcChip().detect();
+        String chipName = NfcChip.detect();
         // Chip model should be OK if it can be detected
         StatusItem result = new StatusItem(getContext(), getString(R.string.status_chip))
                 .setValue(chipName != null ? chipName : getString(R.string.status_unknown));
@@ -232,7 +223,7 @@ public class StatusFragment extends BaseFragment {
         return result;
     }
 
-    private class StatusListAdapter extends CustomArrayAdapter<StatusItem> {
+    private static class StatusListAdapter extends CustomArrayAdapter<StatusItem> {
         StatusListAdapter(@NonNull Context context, int resource) {
             super(context, resource);
         }

@@ -40,18 +40,8 @@ public class CaptureFragment extends BaseFragment {
         updateState();
 
         // handlers
-        mStartButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startCapture();
-            }
-        });
-        mStopButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopCapture();
-            }
-        });
+        mStartButton.setOnClickListener(view -> startCapture());
+        mStopButton.setOnClickListener(view -> stopCapture());
 
         return v;
     }

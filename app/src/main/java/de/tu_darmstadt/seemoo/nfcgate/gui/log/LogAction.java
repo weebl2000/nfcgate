@@ -1,8 +1,6 @@
 package de.tu_darmstadt.seemoo.nfcgate.gui.log;
 
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
@@ -11,7 +9,6 @@ import java.util.List;
 import de.tu_darmstadt.seemoo.nfcgate.db.AppDatabase;
 import de.tu_darmstadt.seemoo.nfcgate.db.NfcCommEntry;
 import de.tu_darmstadt.seemoo.nfcgate.db.SessionLog;
-import de.tu_darmstadt.seemoo.nfcgate.db.SessionLogJoin;
 import de.tu_darmstadt.seemoo.nfcgate.db.model.SessionLogEntryViewModel;
 import de.tu_darmstadt.seemoo.nfcgate.db.model.SessionLogEntryViewModelFactory;
 import de.tu_darmstadt.seemoo.nfcgate.db.pcapng.ISO14443Stream;
@@ -19,9 +16,8 @@ import de.tu_darmstadt.seemoo.nfcgate.gui.component.FileShare;
 import de.tu_darmstadt.seemoo.nfcgate.util.NfcComm;
 
 public class LogAction {
-    private Fragment mFragment;
-    private SessionLogEntryViewModel mLogEntryModel;
-    private List<NfcComm> mLogItems = new ArrayList<>();
+    private final Fragment mFragment;
+    private final List<NfcComm> mLogItems = new ArrayList<>();
 
     public LogAction(Fragment fragment) {
         mFragment = fragment;
@@ -41,19 +37,16 @@ public class LogAction {
         mLogItems.clear();
 
         // setup db model
-        mLogEntryModel = ViewModelProviders.of(mFragment, new SessionLogEntryViewModelFactory(
-                mFragment.getActivity().getApplication(), session.getId()))
+        final SessionLogEntryViewModel mLogEntryModel = ViewModelProviders.of(mFragment, new SessionLogEntryViewModelFactory(
+                        mFragment.getActivity().getApplication(), session.getId()))
                 .get(SessionLogEntryViewModel.class);
 
-        mLogEntryModel.getSession().observe(mFragment, new Observer<SessionLogJoin>() {
-            @Override
-            public void onChanged(@Nullable SessionLogJoin sessionLogJoin) {
-                if (sessionLogJoin != null && mLogItems.isEmpty()) {
-                    for (NfcCommEntry nfcCommEntry : sessionLogJoin.getNfcCommEntries())
-                        mLogItems.add(nfcCommEntry.getNfcComm());
+        mLogEntryModel.getSession().observe(mFragment, sessionLogJoin -> {
+            if (sessionLogJoin != null && mLogItems.isEmpty()) {
+                for (NfcCommEntry nfcCommEntry : sessionLogJoin.getNfcCommEntries())
+                    mLogItems.add(nfcCommEntry.getNfcComm());
 
-                    share(session, mLogItems);
-                }
+                share(session, mLogItems);
             }
         });
     }

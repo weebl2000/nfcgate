@@ -6,8 +6,8 @@ import de.tu_darmstadt.seemoo.nfcgate.util.Utils;
  * Represents a single NCI configuration option with an option code, its length and data
  */
 public class ConfigOption {
-    private OptionType mID;
-    private byte[] mData;
+    private final OptionType mID;
+    private final byte[] mData;
 
     ConfigOption(OptionType ID, byte[] data) {
         mID = ID;
@@ -23,7 +23,7 @@ public class ConfigOption {
     }
 
     public void push(byte[] data, int offset) {
-        data[offset + 0] = mID.getID();
+        data[offset] = mID.getID();
         data[offset + 1] = (byte)mData.length;
 
         System.arraycopy(mData, 0, data, offset + 2, mData.length);

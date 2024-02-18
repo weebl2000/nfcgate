@@ -33,7 +33,7 @@ import de.tu_darmstadt.seemoo.nfcgate.util.NfcComm;
 
 public class ReplayFragment extends BaseNetworkFragment implements LoggingFragment.LogItemSelectedCallback, SessionLogEntryFragment.LogSelectedCallback {
     // session selection reference
-    LoggingFragment mLoggingFragment = new LoggingFragment();
+    final LoggingFragment mLoggingFragment = new LoggingFragment();
     SessionLogEntryFragment mDetailFragment = null;
 
     // replay data
@@ -59,8 +59,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
 
     @Override
     public void onDestroyView() {
-        if (mLoggingFragment != null)
-            setSessionSelectionVisible(false);
+        setSessionSelectionVisible(false);
 
         if (mDetailFragment != null)
             setSessionChooserVisible(false, 0);
@@ -111,12 +110,9 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
                         if (sessionLogJoin != null && mSessionLog == null && mOnce) {
                             mOnce = false;
                             mSessionLog = sessionLogJoin.getNfcCommEntries();
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // show reader/tag selector after session data is loaded
-                                    setSelectorVisible(true);
-                                }
+                            getActivity().runOnUiThread(() -> {
+                                // show reader/tag selector after session data is loaded
+                                setSelectorVisible(true);
                             });
                         }
                     }
@@ -186,12 +182,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
     }
 
     void tickleReplayer() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mReplayer.onReceive(null);
-            }
-        });
+        getActivity().runOnUiThread(() -> mReplayer.onReceive(null));
     }
 
     /**
@@ -217,12 +208,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
             mLogInserter.log(data);
 
             // hide wait indicator
-            runOnUI(new Runnable() {
-                @Override
-                public void run() {
-                    setTagWaitVisible(false, false);
-                }
-            });
+            runOnUI(() -> setTagWaitVisible(false, false));
 
             // forward data to NFC or network
             super.onData(isForeign, data);
@@ -235,12 +221,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
                 super.toNetwork(data);
             else
                 // simulate network send
-                runOnUI(new Runnable() {
-                    @Override
-                    public void run() {
-                        mReplayer.onReceive(data);
-                    }
-                });
+                runOnUI(() -> mReplayer.onReceive(data));
         }
 
         @Override
@@ -248,17 +229,12 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
             super.onNetworkStatus(status);
 
             // report status
-            runOnUI(new Runnable() {
-                @Override
-                public void run() {
-                    handleStatus(status);
-                }
-            });
+            runOnUI(() -> handleStatus(status));
         }
     }
 
     class UIReplayer implements NetworkManager.Callback {
-        NfcLogReplayer mReplayer;
+        final NfcLogReplayer mReplayer;
         NetworkManager mReplayNetwork = null;
 
         UIReplayer(boolean reader) {
@@ -297,12 +273,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
             // report status
             final FragmentActivity activity = getActivity();
             if (activity != null) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        handleStatus(status);
-                    }
-                });
+                activity.runOnUiThread(() -> handleStatus(status));
             }
         }
     }

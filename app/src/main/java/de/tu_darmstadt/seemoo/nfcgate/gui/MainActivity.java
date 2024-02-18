@@ -3,9 +3,7 @@ package de.tu_darmstadt.seemoo.nfcgate.gui;
 import android.content.Intent;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
-import android.nfc.Tag;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.material.navigation.NavigationView;
 import androidx.fragment.app.Fragment;
@@ -62,12 +60,9 @@ public class MainActivity extends AppCompatActivity {
 
         // drawer toggle in toolbar
         mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.empty, R.string.empty);
-        mToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // when drawer icon is NOT visible (due to fragment on backstack), issue back action
-                onBackPressed();
-            }
+        mToggle.setToolbarNavigationClickListener(v -> {
+            // when drawer icon is NOT visible (due to fragment on backstack), issue back action
+            onBackPressed();
         });
         mDrawerLayout.addDrawerListener(mToggle);
 
@@ -75,30 +70,24 @@ public class MainActivity extends AppCompatActivity {
         final FragmentManager fragmentManager = getSupportFragmentManager();
         final ActionBar actionBar = getSupportActionBar();
 
-        fragmentManager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-            @Override
-            public void onBackStackChanged() {
-                if (fragmentManager.getBackStackEntryCount() > 0) {
-                    // https://stackoverflow.com/a/29594947
-                    actionBar.setDisplayHomeAsUpEnabled(false);
-                    mToggle.setDrawerIndicatorEnabled(false);
-                    actionBar.setDisplayHomeAsUpEnabled(true);
-                } else {
-                    actionBar.setDisplayHomeAsUpEnabled(false);
-                    mToggle.setDrawerIndicatorEnabled(true);
-                    mToggle.syncState();
-                }
+        fragmentManager.addOnBackStackChangedListener(() -> {
+            if (fragmentManager.getBackStackEntryCount() > 0) {
+                // https://stackoverflow.com/a/29594947
+                actionBar.setDisplayHomeAsUpEnabled(false);
+                mToggle.setDrawerIndicatorEnabled(false);
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            } else {
+                actionBar.setDisplayHomeAsUpEnabled(false);
+                mToggle.setDrawerIndicatorEnabled(true);
+                mToggle.syncState();
             }
         });
 
         // navbar setup actions
         mNavbar = findViewById(R.id.main_navigation);
-        mNavbar.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                onNavbarAction(item);
-                return true;
-            }
+        mNavbar.setNavigationItemSelectedListener(item -> {
+            onNavbarAction(item);
+            return true;
         });
 
         // initially select clone mode
@@ -131,9 +120,9 @@ public class MainActivity extends AppCompatActivity {
         // tech discovered is triggered by XML, tag discovered by foreground dispatch
         if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction()) ||
                 NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction()))
-            mNfc.onTagDiscovered(intent.<Tag>getParcelableExtra(NfcAdapter.EXTRA_TAG));
+            mNfc.onTagDiscovered(intent.getParcelableExtra(NfcAdapter.EXTRA_TAG));
         else if (Intent.ACTION_SEND.equals(intent.getAction()))
-            importPcap(intent.<Uri>getParcelableExtra(Intent.EXTRA_STREAM));
+            importPcap(intent.getParcelableExtra(Intent.EXTRA_STREAM));
         else if (Intent.ACTION_VIEW.equals(intent.getAction()))
             importPcap(intent.getData());
         else if ("de.tu_darmstadt.seemoo.nfcgate.daemoncall".equals(intent.getAction()))
@@ -158,26 +147,25 @@ public class MainActivity extends AppCompatActivity {
      * Returns a Fragment for every navbar action
      */
     private Fragment getFragmentByAction(int id) {
-        switch (id) {
-            case R.id.nav_clone:
-                return new CloneFragment();
-            case R.id.nav_relay:
-                return new RelayFragment();
-            case R.id.nav_replay:
-                return new ReplayFragment();
-            case R.id.nav_capture:
-                return new CaptureFragment();
-            case R.id.nav_settings:
-                return new SettingsFragment();
-            case R.id.nav_status:
-                return new StatusFragment();
-            case R.id.nav_about:
-                return new AboutFragment();
-            case R.id.nav_logging:
-                return new LoggingFragment();
-            default:
-                throw new IllegalArgumentException("Position out of range");
+        if (R.id.nav_clone == id) {
+            return new CloneFragment();
+        } else if (R.id.nav_relay == id) {
+            return new RelayFragment();
+        } else if (R.id.nav_replay == id) {
+            return new ReplayFragment();
+        } else if (R.id.nav_capture == id) {
+            return new CaptureFragment();
+        } else if (R.id.nav_settings == id) {
+            return new SettingsFragment();
+        } else if (R.id.nav_status == id) {
+            return new StatusFragment();
+        } else if (R.id.nav_about == id) {
+            return new AboutFragment();
+        } else if (R.id.nav_logging == id) {
+            return new LoggingFragment();
         }
+
+        throw new IllegalArgumentException("Position out of range");
     }
 
     /**
