@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.preference.PreferenceManagerFix;
+import androidx.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,7 +76,7 @@ public class ReplayFragment extends BaseNetworkFragment implements LoggingFragme
         mLogInserter = new LogInserter(getActivity(), SessionLog.SessionType.REPLAY, this);
 
         // get preference data
-        SharedPreferences prefs = PreferenceManagerFix.getDefaultSharedPreferences(getActivity());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mOfflineReplay = !prefs.getBoolean("network", false);
         mReplayMode = prefs.getString("mode", "index");
         mStatusBanner.setVisibility(!mOfflineReplay);

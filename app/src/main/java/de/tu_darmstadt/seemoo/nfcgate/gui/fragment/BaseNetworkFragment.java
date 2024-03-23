@@ -7,7 +7,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.preference.PreferenceManagerFix;
+import androidx.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -129,7 +129,7 @@ public abstract class BaseNetworkFragment extends BaseFragment implements LogIns
      * Returns true if any server hostname was configured in settings
      */
     private boolean isServerConfigured() {
-        SharedPreferences prefs = PreferenceManagerFix.getDefaultSharedPreferences(getActivity());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         return !prefs.getString("host", "").isEmpty();
     }
 

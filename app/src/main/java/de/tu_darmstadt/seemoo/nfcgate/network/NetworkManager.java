@@ -1,7 +1,7 @@
 package de.tu_darmstadt.seemoo.nfcgate.network;
 
 import android.content.SharedPreferences;
-import androidx.preference.PreferenceManagerFix;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.protobuf.ByteString;
@@ -111,7 +111,7 @@ public class NetworkManager implements ServerConnection.Callback {
 
     private void loadPreferenceData() {
         // read data from shared prefs
-        SharedPreferences prefs = PreferenceManagerFix.getDefaultSharedPreferences(mActivity);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mActivity);
         mHostname = prefs.getString("host", null);
         mPort = Integer.parseInt(prefs.getString("port", "0"));
         mSessionNumber = Integer.parseInt(prefs.getString("session", "0"));
