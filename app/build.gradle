@@ -5,7 +5,7 @@ plugins {
 android {
     namespace 'de.tu_darmstadt.seemoo.nfcgate'
 
-    compileSdk 33
+    compileSdk 34
     ndkVersion '22.1.7171670'
 
     compileOptions {
@@ -16,7 +16,7 @@ android {
     defaultConfig {
         applicationId 'de.tu_darmstadt.seemoo.nfcgate'
         minSdkVersion 19
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode 9
         versionName '2.3.0'
     }
@@ -42,8 +42,8 @@ dependencies {
     implementation "com.google.protobuf:protobuf-javalite:${protobufVersion}"
 
     // support libraries
-    implementation 'androidx.appcompat:appcompat:1.0.0'
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
 
     // Fixes most of the issues with the support-preference libraries (contains v7 and v14)
     implementation 'com.takisoft.fix:preference-v7:27.1.1.1'
