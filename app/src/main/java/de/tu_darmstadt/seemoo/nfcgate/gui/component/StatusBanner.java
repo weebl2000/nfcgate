@@ -60,6 +60,10 @@ public class StatusBanner {
         setVisibility(true);
     }
 
+    public void setSuccess(String message) {
+        set(State.GREEN, message);
+    }
+
     public void setWarning(String message) {
         set(State.YELLOW, mContext.getString(R.string.banner_warning, message));
     }

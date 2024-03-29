@@ -33,6 +33,18 @@
             android:maxLength="5"
             android:defaultValue="5566"
             />
+        <CheckBoxPreference
+            android:title="@string/settings_tls"
+            android:key="tls"
+
+            android:summary="@string/settings_tls_summary"
+            android:defaultValue="false"
+            />
+        <Preference
+            android:title="@string/settings_reset_usertrust"
+            android:key="reset_usertrust"
+            android:summary="@string/settings_reset_usertrust_summary"
+            />
         <EditTextPreference
             android:title="@string/settings_session"
             android:key="session"

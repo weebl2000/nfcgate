@@ -33,6 +33,7 @@ import de.tu_darmstadt.seemoo.nfcgate.gui.log.LoggingFragment;
 import de.tu_darmstadt.seemoo.nfcgate.gui.fragment.RelayFragment;
 import de.tu_darmstadt.seemoo.nfcgate.gui.fragment.ReplayFragment;
 import de.tu_darmstadt.seemoo.nfcgate.gui.fragment.SettingsFragment;
+import de.tu_darmstadt.seemoo.nfcgate.network.UserTrustManager;
 import de.tu_darmstadt.seemoo.nfcgate.nfc.NfcManager;
 import de.tu_darmstadt.seemoo.nfcgate.util.NfcComm;
 
@@ -98,6 +99,9 @@ public class MainActivity extends AppCompatActivity {
         mNfc = new NfcManager(this);
         if (!mNfc.hasNfc() || !mNfc.isEnabled())
             showWarning(getString(R.string.error_NFCCAP));
+
+        // TLS setup
+        UserTrustManager.init(this);
     }
 
     @Override

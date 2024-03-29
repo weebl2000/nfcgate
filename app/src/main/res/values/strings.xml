@@ -38,6 +38,9 @@
     <string name="network_connected">Network: Connected to partner</string>
     <string name="network_disconnected">Network: Partner left</string>
     <string name="network_idle">Idle</string>
+    <string name="network_tls_error">Network: TLS error</string>
+    <string name="network_tls_unknown">Network: Certificate unknown</string>
+    <string name="network_tls_untrusted">Network: Certificate untrusted</string>
 
     <!-- Error messages -->
     <string name="error_NFCCAP">Your device does not support NFC or you turned it off. Please enable NFC to use NFCGate.</string>
@@ -124,12 +127,32 @@
     <string name="settings_port">Port</string>
     <string name="settings_port_summary">Server Port</string>
     <string name="settings_port_dialog">Enter a valid port number</string>
+    <string name="settings_tls">Use TLS</string>
+    <string name="settings_tls_summary">Use Transport Layer Security (TLS) when connecting to server.</string>
+    <string name="settings_reset_usertrust">Reset certificate trust</string>
+    <string name="settings_reset_usertrust_summary">Resets user preferences for all manually trusted/blocked TLS certificates.</string>
     <string name="settings_session">Session</string>
     <string name="settings_session_summary">Shared Session Number</string>
     <string name="settings_session_dialog">Enter a two-digit session number</string>
     <string name="settings_replay">Replay Settings</string>
     <string name="settings_adv_replay">Advanced Replay</string>
     <string name="settings_adv_replay_summary">Enables replay over network</string>
+    <string name="settings_adv_replay_toast">User preferences for certificate trust have been reset!</string>
     <string name="settings_replay_mode">Replay mode</string>
     <string name="settings_replay_mode_summary">Sets reply mode for replay requests</string>
+
+    <!-- dialogs -->
+    <string name="dialog_usertrust_message">Trust this unknown certificate chain?</string>
+    <string name="dialog_usertrust_positive">Trust</string>
+    <string name="dialog_usertrust_negative">Block</string>
+    <string name="dialog_usertrust_neutral">Cancel</string>
+    <string name="dialog_usertrust_tab_root">Root</string>
+    <string name="dialog_usertrust_tab_cert">Cert %1$d</string>
+
+    <string name="dialog_usertrust_cert_subject_dn">Subject DN:</string>
+    <string name="dialog_usertrust_cert_issuer_dn">Issuer DN:</string>
+    <string name="dialog_usertrust_cert_not_before">Not Before:</string>
+    <string name="dialog_usertrust_cert_not_after">Not After:</string>
+    <string name="dialog_usertrust_cert_public_key_info">Public Key Info:</string>
+    <string name="dialog_usertrust_cert_fingerprint">Fingerprint \n(SHA-256):</string>
 </resources>

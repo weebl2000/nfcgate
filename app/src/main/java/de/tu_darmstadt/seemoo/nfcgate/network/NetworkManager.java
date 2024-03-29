@@ -45,7 +45,9 @@ public class NetworkManager implements ServerConnection.Callback {
             disconnect();
 
         // establish connection
-        mConnection = new ServerConnection(mHostname, mPort)
+        boolean tlsEnabled = PreferenceManager.getDefaultSharedPreferences(mActivity)
+                .getBoolean("tls", false);
+        mConnection = new ServerConnection(mHostname, mPort, tlsEnabled)
                 .setCallback(this)
                 .connect();
 

@@ -20,6 +20,7 @@ import android.widget.TextView;
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.worker.LogInserter;
 import de.tu_darmstadt.seemoo.nfcgate.gui.component.StatusBanner;
+import de.tu_darmstadt.seemoo.nfcgate.gui.dialog.CertificateTrustDialogFragment;
 import de.tu_darmstadt.seemoo.nfcgate.gui.log.SessionLogEntryFragment;
 import de.tu_darmstadt.seemoo.nfcgate.network.data.NetworkStatus;
 
@@ -98,19 +99,30 @@ public abstract class BaseNetworkFragment extends BaseFragment implements LogIns
     protected void handleStatus(NetworkStatus status) {
         switch (status) {
             case ERROR:
-                mStatusBanner.set(StatusBanner.State.RED, getString(R.string.network_error));
+                mStatusBanner.setError(getString(R.string.network_error));
+                break;
+            case ERROR_TLS:
+                mStatusBanner.setError(getString(R.string.network_tls_error));
+                break;
+            case ERROR_TLS_CERT_UNKNOWN: {
+                mStatusBanner.setWarning(getString(R.string.network_tls_unknown));
+                new CertificateTrustDialogFragment().show(getMainActivity().getSupportFragmentManager(), "trust");
+                break;
+            }
+            case ERROR_TLS_CERT_UNTRUSTED:
+                mStatusBanner.setError(getString(R.string.network_tls_untrusted));
                 break;
             case CONNECTING:
-                mStatusBanner.set(StatusBanner.State.RED, getString(R.string.network_connecting));
+                mStatusBanner.setError(getString(R.string.network_connecting));
                 break;
             case CONNECTED:
-                mStatusBanner.set(StatusBanner.State.YELLOW, getString(R.string.network_connected_wait));
+                mStatusBanner.setWarning(getString(R.string.network_connected_wait));
                 break;
             case PARTNER_CONNECT:
-                mStatusBanner.set(StatusBanner.State.GREEN, getString(R.string.network_connected));
+                mStatusBanner.setSuccess(getString(R.string.network_connected));
                 break;
             case PARTNER_LEFT:
-                mStatusBanner.set(StatusBanner.State.RED, getString(R.string.network_disconnected));
+                mStatusBanner.setError(getString(R.string.network_disconnected));
                 break;
         }
     }

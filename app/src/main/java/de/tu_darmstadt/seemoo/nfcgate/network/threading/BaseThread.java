@@ -3,7 +3,11 @@ package de.tu_darmstadt.seemoo.nfcgate.network.threading;
 import java.io.IOException;
 import java.net.Socket;
 
+import javax.net.ssl.SSLException;
+
 import de.tu_darmstadt.seemoo.nfcgate.network.ServerConnection;
+import de.tu_darmstadt.seemoo.nfcgate.network.UserTrustManager;
+import de.tu_darmstadt.seemoo.nfcgate.network.data.NetworkStatus;
 
 /**
  * An interruptible thread that properly handles interrupt()
@@ -28,10 +32,10 @@ public abstract class BaseThread extends Thread {
         try {
             mSocket = mConnection.openSocket();
             if (mSocket == null)
-                throw new IOException("Socket error");
+                throw new IOException("openSocket failed");
 
             initThread();
-        } catch (IOException e) {
+        } catch (Exception e) {
             mExit = true;
             onError(e);
         }
@@ -43,7 +47,7 @@ public abstract class BaseThread extends Thread {
             catch (InterruptedException e) {
                 // loop
             }
-            catch (IOException e) {
+            catch (Exception e) {
                 mExit = true;
                 onError(e);
             }
@@ -55,5 +59,21 @@ public abstract class BaseThread extends Thread {
 
     abstract void initThread() throws IOException;
     abstract void runInternal() throws IOException, InterruptedException;
-    abstract void onError(Exception e);
+    void onError(Exception e) {
+        // get innermost exception
+        Throwable cause = e;
+        while (cause.getCause() != null)
+            cause = cause.getCause();
+
+        // specific causes
+        if (cause instanceof UserTrustManager.UnknownTrustException)
+            mConnection.reportStatus(NetworkStatus.ERROR_TLS_CERT_UNKNOWN);
+        else if (cause instanceof UserTrustManager.UntrustedException)
+            mConnection.reportStatus(NetworkStatus.ERROR_TLS_CERT_UNTRUSTED);
+        // general failures
+        else if (e instanceof SSLException)
+            mConnection.reportStatus(NetworkStatus.ERROR_TLS);
+        else
+            mConnection.reportStatus(NetworkStatus.ERROR);
+    }
 }

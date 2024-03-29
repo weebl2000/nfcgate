@@ -3,7 +3,6 @@ package de.tu_darmstadt.seemoo.nfcgate.network;
 import android.util.Log;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -12,6 +11,9 @@ import de.tu_darmstadt.seemoo.nfcgate.network.data.NetworkStatus;
 import de.tu_darmstadt.seemoo.nfcgate.network.data.SendRecord;
 import de.tu_darmstadt.seemoo.nfcgate.network.threading.ReceiveThread;
 import de.tu_darmstadt.seemoo.nfcgate.network.threading.SendThread;
+import de.tu_darmstadt.seemoo.nfcgate.network.transport.PlainTransport;
+import de.tu_darmstadt.seemoo.nfcgate.network.transport.TLSTransport;
+import de.tu_darmstadt.seemoo.nfcgate.network.transport.Transport;
 
 public class ServerConnection {
     private static final String TAG = "ServerConnection";
@@ -22,7 +24,7 @@ public class ServerConnection {
     }
 
     // connection objects
-    private Socket mSocket;
+    private Transport mTransport;
     private final Object mSocketLock = new Object();
 
     // threading
@@ -32,12 +34,13 @@ public class ServerConnection {
 
     // metadata
     private Callback mCallback;
-    private final String mHostname;
-    private final int mPort;
 
-    ServerConnection(String hostname, int port) {
-        mHostname = hostname;
-        mPort = port;
+    ServerConnection(String hostname, int port, boolean tls) {
+        this(tls ? new TLSTransport(hostname, port) : new PlainTransport(hostname, port));
+    }
+
+    ServerConnection(Transport transport) {
+        mTransport = transport;
     }
 
     ServerConnection setCallback(Callback cb) {
@@ -49,6 +52,9 @@ public class ServerConnection {
      * Connects to the socket, enables async I/O
      */
     ServerConnection connect() {
+        // reset transport to close sockets and allow re-initialization
+        mTransport.close(true);
+
         // I/O threads
         mSendThread = new SendThread(this);
         mReceiveThread = new ReceiveThread(this);
@@ -90,22 +96,26 @@ public class ServerConnection {
     /**
      * Called by threads to open socket
      */
-    public Socket openSocket() {
+    public Socket openSocket() throws IOException {
         synchronized (mSocketLock) {
-            if (mSocket == null) {
-                try {
-                    mSocket = new Socket();
-                    mSocket.connect(new InetSocketAddress(mHostname, mPort), 10000);
-                    mSocket.setTcpNoDelay(true);
-
+            // do not try to establish transport if init was already called
+            Log.d(TAG, "ServerConnection.openSocket(): " + Thread.currentThread().getId());
+            try {
+                if (mTransport.connect()) {
+                    // transport is newly connected
                     reportStatus(NetworkStatus.CONNECTED);
-                } catch (Exception e) {
-                    Log.e(TAG, "Socket cannot connect", e);
-                    mSocket = null;
+                    mTransport.socket().setTcpNoDelay(true);
                 }
+            } catch (Exception e) {
+                Log.d(TAG, "mTransport.init exception: " + Thread.currentThread().getId());
+                Log.e(TAG, "Transport cannot connect", e);
+                mTransport.close(false);
+
+                // rethrow so that caller is also notified about exception
+                throw e;
             }
 
-            return mSocket;
+            return mTransport.socket();
         }
     }
 
@@ -114,15 +124,7 @@ public class ServerConnection {
      */
     public void closeSocket() {
         synchronized (mSocketLock) {
-            if (mSocket != null) {
-                try {
-                    mSocket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            mSocket = null;
+            mTransport.close(false);
         }
     }
 
