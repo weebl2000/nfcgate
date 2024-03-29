@@ -19,6 +19,7 @@ android {
         targetSdkVersion 34
         versionCode 9
         versionName '2.3.0'
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -60,4 +61,8 @@ dependencies {
     // Lifecycle
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     annotationProcessor 'androidx.lifecycle:lifecycle-compiler:2.0.0'
+
+    // testing
+    androidTestImplementation 'androidx.test:runner:1.5.0'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
 }
