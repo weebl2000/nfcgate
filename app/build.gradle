@@ -17,6 +17,7 @@ android {
         applicationId 'de.tu_darmstadt.seemoo.nfcgate'
         minSdkVersion 19
         targetSdkVersion 34
+        multiDexEnabled true
         versionCode 9
         versionName '2.3.0'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -43,6 +44,7 @@ dependencies {
     implementation "com.google.protobuf:protobuf-javalite:${protobufVersion}"
 
     // support libraries
+    implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     implementation "androidx.viewpager2:viewpager2:1.0.0"
