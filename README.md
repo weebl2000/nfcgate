@@ -46,7 +46,7 @@ Please consider the following issues and caveats before using the application (a
 When using modes, that utilize HCE, the phone has to implement the [NFC Controller Interface (NCI)](https://nfc-forum.org/our-work/specifications-and-application-documents/specifications/nfc-controller-interface-nci-specification/) specification. Most of the phones should implement this specification when offering HCE support.
 
 ### Confidentiality of Data Channel (relay)
-Right now, all data in relay mode is sent *unencrypted* over the network. We may or may not get around to implementing cryptographic protection, but for now, consider everything you send over the network to be readable by anyone interested, unless you use extra protection like VPNs. Keep that in mind while performing your own tests.
+To ensure confidentiality and integrity, use Transport Layer Security (TLS), which can be enabled in NFCGate settings. You need a CA-issued or self-signed certificate. Certificates from system-trusted CAs are trusted automatically. Self-signed certificates can be trusted by the user on first use (TOFU).
 
 ### Compatibility with Cards (relay, replay, clone)
 We can only proxy tags supported by Android. For example, Android no longer offers support for MiFare classic chips, so these cards are not supported. When in doubt, use an application like NFC Tag info to find out if your tag is compatible. Also, at the moment, every tag technology supported by Android's HCE is supported (A, B, F), however NFC-B and NFC-F remain untested. NFC-A tags are the most common tags (for example, both the MiFare DESFire and specialized chips like the ones in electronic passports use NFC-A), but you may experience problems if you use other tags.
