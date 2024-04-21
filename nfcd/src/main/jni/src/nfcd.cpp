@@ -237,12 +237,12 @@ bool HookGlobals::tryHookNFACB() {
 
 Symbol_ref HookGlobals::lookupSymbol(const std::string &name) const {
     Symbol_ref result(new Symbol(name, mHandle));
-    LOG_ASSERT_S(result, return nullptr, "Symbol lookup failed for %s", name.c_str());
+    LOG_ASSERT_S(result->valid(), return nullptr, "Symbol lookup failed for %s", name.c_str());
     return result;
 }
 
 IHook_ref HookGlobals::hookSymbol(const std::string &name, void *hook) const {
     auto result = IHook::hook(name, hook, mHandle, mLibraryRe);
-    LOG_ASSERT_S(result, return nullptr, "Hooking failed for %s", name.c_str());
+    LOG_ASSERT_S(result->isHooked(), return nullptr, "Hooking failed for %s", name.c_str());
     return result;
 }

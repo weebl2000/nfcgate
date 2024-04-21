@@ -22,6 +22,10 @@ public:
         return reinterpret_cast<T*>(mAddress);
     }
 
+    bool valid() const {
+        return mAddress != nullptr;
+    }
+
 protected:
     void *mAddress = nullptr;
     std::string mName;
