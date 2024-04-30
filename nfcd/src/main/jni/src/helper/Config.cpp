@@ -7,23 +7,28 @@ std::unordered_map<uint8_t, std::string> knownConfigTypes = {
         // COMMON
         {0x00, "TOTAL_DURATION"},
         {0x01, "CON_DEVICES_LIMIT"},
-        // 0x02 - 0x07 RFU
+        {0x02, "CON_DISCOVERY_PARAM"},
+        {0x03, "POWER_STATE"},
+        // 0x04 - 0x07 RFU
 
         // POLL A
         {0x08, "PA_BAIL_OUT"},
-        // 0x09 - 0x0F RFU
+        {0x09, "PA_DEVICES_LIMIT"},
+        // 0x0A - 0x0F RFU
 
         // POLL B
         {0x10, "PB_AFI"},
         {0x11, "PB_BAIL_OUT"},
         {0x12, "PB_ATTRIB_PARAM1"},
         {0x13, "PB_SENSB_REQ_PARAM"},
-        // 0x14 - 0x17 RFU
+        {0x14, "PB_DEVICES_LIMIT"},
+        // 0x15 - 0x17 RFU
 
         // POLL F
         {0x18, "PF_BIT_RATE"},
         {0x19, "PF_RC_CODE"},
-        // 0x1A - 0x1F RFU
+        {0x1A, "PF_DEVICES_LIMIT"},
+        // 0x1B - 0x1F RFU
 
         // POLL ISO-DEP
         {0x20, "PB_H_INFO"},
@@ -35,7 +40,10 @@ std::unordered_map<uint8_t, std::string> knownConfigTypes = {
         {0x28, "PN_NFC_DEP_SPEED"},
         {0x29, "PN_ATR_REQ_GEN_BYTES"},
         {0x2A, "PN_ATR_REQ_CONFIG"},
-        // 0x2B - 0x2F RFU
+        // 0x2B - 0x2E RFU
+
+        // POLL NFC-V
+        {0x2F, "PV_DEVICES_LIMIT"},
 
         // LISTEN A
         {0x30, "LA_BIT_FRAME_SDD"},
@@ -49,8 +57,10 @@ std::unordered_map<uint8_t, std::string> knownConfigTypes = {
         {0x39, "LB_NFCID0"},
         {0x3A, "LB_APPLICATION_DATA"},
         {0x3B, "LB_SFGI"},
-        {0x3C, "LB_ADC_FO"},
-        // 0x3D - 0x3F RFU
+        {0x3C, "LB_FWI_ADC_FO"},
+        // 0x3D RFU
+        {0x3E, "LB_BIT_RATE"},
+        // 0x3F RFU
 
         // LISTEN F
         {0x40, "LF_T3T_IDENTIFIERS_1"},
@@ -78,25 +88,37 @@ std::unordered_map<uint8_t, std::string> knownConfigTypes = {
         // 0x56 - 0x57 RFU
 
         // LISTEN ISO-DEP
-        {0x58, "LI_FWI"},
+        {0x58, "LI_A_RATS_TB1"},
         {0x59, "LA_HIST_BY"},
         {0x5A, "LB_H_INFO_RESP"},
         {0x5B, "LI_BIT_RATE"},
-        // 0x5C - 0x5F RFU
+        {0x5C, "LI_A_RATS_TC1"},
+        // 0x5D - 0x5F RFU
 
         // LISTEN NFC-DEP
         {0x60, "LN_WT"},
         {0x61, "LN_ATR_RES_GEN_BYTES"},
         {0x62, "LN_ATR_RES_CONFIG"},
-        // 0x63 - 0x7F RFU
+        // 0x63 - 0x67 RFU
+
+        // ACTIVE
+        {0x68, "PACM_BIT_RATE"},
+
+        // POLL WLC-P-WLC
+        {0x69, "WLC-P CAP_POWER_CLASS"},
+        {0x6A, "TOT_POWER_STEPS"},
+        {0x6B, "WLC-AUTO CAPABILITIES"},
+        // 0x6C - 0x7F RFU
 
         // OTHER
         {0x80, "RF_FIELD_INFO"},
         {0x81, "RF_NFCEE_ACTION"},
         {0x82, "NFCDEP_OP"},
-        // 0x83 - 0x84 RFU
+        {0x83, "LLCP_VERSION"},
+        // 0x84 RFU
         {0x85, "NFCC_CONFIG_CONTROL"},
-        // 0x86 - 0x9F RFU
+        {0x86, "RF_WLC_STATUS_CONFIG"},
+        // 0x87 - 0x9F RFU
 };
 
 std::string Option::name() const {
