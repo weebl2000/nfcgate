@@ -5,6 +5,7 @@
 #include <nfcd/helper/EventQueue.h>
 #include <nfcd/helper/MapInfo.h>
 #include <nfcd/helper/StringUtil.h>
+#include <nfcd/helper/StructSizeProber.h>
 #include <nfcd/helper/SymbolTable.h>
 #include <nfcd/helper/System.h>
 #include <nfcd/hook/IHook.h>
@@ -20,6 +21,8 @@ using def_NFA_StopRfDiscovery = tNFA_STATUS();
 using def_NFA_DisablePolling = tNFA_STATUS();
 using def_NFA_StartRfDiscovery = tNFA_STATUS();
 using def_NFA_EnablePolling = tNFA_STATUS(tNFA_TECHNOLOGY_MASK poll_mask);
+using def_NFA_EeModeSet = tNFA_STATUS(uint16_t ee_handle, uint8_t mode);
+using def_NFA_EeGetInfo = tNFA_STATUS(uint8_t* p_num_nfcee, void * p_info);
 using def_NFA_CONN_CBACK = void(uint8_t event, void *data);
 using def_ce_select_t4t = decltype(hook_ce_select_t4t);
 
@@ -50,6 +53,8 @@ public:
     Symbol_ref hNFA_DisablePolling;
     Symbol_ref hNFA_StartRfDiscovery;
     Symbol_ref hNFA_EnablePolling;
+    Symbol_ref hNFA_EeModeSet;
+    Symbol_ref hNFA_EeGetInfo;
 
     def_NFA_CONN_CBACK *origNfaConnCBack = nullptr;
     std::mutex nfaConnCBackMutex;

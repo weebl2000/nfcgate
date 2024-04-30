@@ -175,6 +175,8 @@ HookGlobals::HookGlobals() {
         // polling / listening
         ASSERT_X(hNFA_EnablePolling = lookupSymbol("NFA_EnablePolling"));
         ASSERT_X(hNFA_DisablePolling = lookupSymbol("NFA_DisablePolling"));
+        ASSERT_X(hNFA_EeModeSet = lookupSymbol("NFA_EeModeSet"));
+        ASSERT_X(hNFA_EeGetInfo = lookupSymbol("NFA_EeGetInfo"));
 
         // NFC routing
         ASSERT_X(hce_select_t4t = hookSymbol("ce_select_t4t", (void *)&hook_ce_select_t4t));
