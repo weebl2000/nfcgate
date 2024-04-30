@@ -66,6 +66,41 @@ tNFC_STATUS hook_NFC_SetConfig(uint8_t tlv_size, uint8_t *p_param_tlvs) {
     return result;
 }
 
+tNFC_STATUS hook_NFC_DiscoveryStart(uint8_t num_params, tNCI_DISCOVER_PARAMS *p_params, void* p_cback) {
+    globals.hNFC_DiscoveryStart->precall();
+
+    LOGI("hook_NFC_DiscoveryStart: Begin: %d, %p", num_params, p_params);
+
+    tNCI_DISCOVER_PARAMS new_params[num_params];
+    uint8_t new_num_params = 0;
+
+    if (globals.patchEnabled) {
+        for (int i = 0; i < num_params; ++i) {
+            tNCI_DISCOVER_PARAMS param = p_params[i];
+            // only block "listen" types that are not in the set of allowed types
+            bool blocked = param.type >= 0x80 && globals.discoveryTypes.count(param.type) == 0;
+
+            LOGD("  param[%d].type %x", i, param.type);
+            LOGD("  param[%d].frequency %d", i, param.frequency);
+            LOGD("  param[%d] blocked? %s", i, blocked ? "true" : "false");
+
+            if (!blocked)
+                new_params[new_num_params++] = param;
+        }
+
+        num_params = new_num_params;
+        p_params = new_params;
+    }
+    else
+        LOGD("hook_NFC_DiscoveryStart: patch disabled");
+
+    auto res = globals.hNFC_DiscoveryStart->call<def_NFC_DiscoveryStart>(num_params, p_params, p_cback);
+    LOGI("hook_NFC_DiscoveryStart: Result: %x", res);
+
+    globals.hNFC_DiscoveryStart->postcall();
+    return res;
+}
+
 tNFA_STATUS hook_NFA_Enable(void *p_dm_cback, void *p_conn_cback) {
     globals.hNFA_Enable->precall();
 
@@ -129,6 +164,8 @@ HookGlobals::HookGlobals() {
     {
         // NFC/NFA main functions
         ASSERT_X(hNFC_SetConfig = hookSymbol("NFC_SetConfig", (void *)&hook_NFC_SetConfig));
+        ASSERT_X(hNFC_DiscoveryStart = hookSymbol("NFC_DiscoveryStart", (void *)&hook_NFC_DiscoveryStart));
+
         ASSERT_X(hNFA_Enable = hookSymbol("NFA_Enable", (void *)&hook_NFA_Enable));
 
         // discovery
@@ -138,7 +175,6 @@ HookGlobals::HookGlobals() {
         // polling / listening
         ASSERT_X(hNFA_EnablePolling = lookupSymbol("NFA_EnablePolling"));
         ASSERT_X(hNFA_DisablePolling = lookupSymbol("NFA_DisablePolling"));
-        ASSERT_X(hNFA_SetP2pListenTech = lookupSymbol("NFA_SetP2pListenTech"));
 
         // NFC routing
         ASSERT_X(hce_select_t4t = hookSymbol("ce_select_t4t", (void *)&hook_ce_select_t4t));

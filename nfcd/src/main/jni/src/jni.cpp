@@ -16,16 +16,21 @@ static void waitForEvent(uint8_t event, bool checkStatus = true) {
         LOGW("[event] Waiting for %s failed: timeout reached", System::nfaEventName(event).c_str());
 }
 
-tNFA_TECHNOLOGY_MASK maskFromConfig(const Config &config) {
-    tNFA_TECHNOLOGY_MASK result = 0;
+std::set<tNCI_DISCOVERY_TYPE> discoveryTypesFromConfig(const Config &config) {
+    std::set<tNCI_DISCOVERY_TYPE> result;
 
     for (const auto &option : config.options()) {
-        if (option.name().find("LA") == 0)
-            result |= NFA_TECHNOLOGY_MASK_A | NFA_TECHNOLOGY_MASK_A_ACTIVE;
-        else if (option.name().find("LB") == 0)
-            result |= NFA_TECHNOLOGY_MASK_B;
-        else if (option.name().find("LF") == 0)
-            result |= NFA_TECHNOLOGY_MASK_F | NFA_TECHNOLOGY_MASK_F_ACTIVE;
+        if (option.name().find("LA") == 0) {
+            result.emplace(NCI_DISCOVERY_TYPE_LISTEN_A);
+            result.emplace(NCI_DISCOVERY_TYPE_LISTEN_A_ACTIVE);
+        }
+        else if (option.name().find("LB") == 0) {
+            result.emplace(NCI_DISCOVERY_TYPE_LISTEN_B);
+        }
+        else if (option.name().find("LF") == 0) {
+            result.emplace(NCI_DISCOVERY_TYPE_LISTEN_F);
+            result.emplace(NCI_DISCOVERY_TYPE_LISTEN_F_ACTIVE);
+        }
     }
 
     return result;
@@ -63,11 +68,10 @@ void nfaDisablePolling() {
     waitForEvent(NFA_POLL_DISABLED_EVT);
 }
 
-void nfaSetListenTech(tNFA_TECHNOLOGY_MASK tech) {
-    beginCollectingEvents();
-    globals.hNFA_SetP2pListenTech->call<def_NFA_SetP2pListenTech>(tech);
-    LOGD("[nfcd] Setting listen tech to %d", tech);
-    waitForEvent(NFA_SET_P2P_LISTEN_TECH_EVT);
+void limitDiscoveryTypes(std::set<tNCI_DISCOVERY_TYPE> discoveryTypes) {
+    globals.discoveryTypes = discoveryTypes;
+    for (tNCI_DISCOVERY_TYPE discoveryType : discoveryTypes)
+        LOGD("[nfcd] Limiting listen to type %d", discoveryType);
 }
 
 void applyConfig(Config &config) {

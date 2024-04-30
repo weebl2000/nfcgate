@@ -5,6 +5,7 @@
 using tNFC_STATUS = uint8_t;
 using tNFA_STATUS = uint8_t;
 using tNFA_TECHNOLOGY_MASK = uint8_t;
+using tNCI_DISCOVERY_TYPE = uint8_t;
 // Wildcard AID selected
 #define CE_T4T_STATUS_WILDCARD_AID_SELECTED 0x40
 // offset to ce_cb->mem.t4t.status field (ce_int.h)
@@ -14,6 +15,11 @@ using tNFA_TECHNOLOGY_MASK = uint8_t;
 #define NFA_DM_CB_CONN_CBACK (8 * sizeof(void*))
 
 // modified from nfa_api.h
+
+typedef struct {
+    uint8_t type;
+    uint8_t frequency;
+} tNCI_DISCOVER_PARAMS;
 
 /* NFA Connection Callback Events */
 #define NFA_POLL_ENABLED_EVT 0
@@ -35,6 +41,14 @@ using tNFA_TECHNOLOGY_MASK = uint8_t;
     (NFA_TECHNOLOGY_MASK_A | NFA_TECHNOLOGY_MASK_B | NFA_TECHNOLOGY_MASK_F | \
      NFA_TECHNOLOGY_MASK_V | NFA_TECHNOLOGY_MASK_A_ACTIVE | NFA_TECHNOLOGY_MASK_F_ACTIVE | \
      NFA_TECHNOLOGY_MASK_KOVIO)
+
+/* NCI Discovery Mask Values */
+#define NCI_DISCOVERY_TYPE_LISTEN_A 0x80
+#define NCI_DISCOVERY_TYPE_LISTEN_B 0x81
+#define NCI_DISCOVERY_TYPE_LISTEN_F 0x82
+#define NCI_DISCOVERY_TYPE_LISTEN_A_ACTIVE 0x83
+#define NCI_DISCOVERY_TYPE_LISTEN_F_ACTIVE 0x85
+#define NCI_DISCOVERY_TYPE_LISTEN_ISO15693 0x86
 
 class System {
 public:
