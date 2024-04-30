@@ -166,6 +166,7 @@ public class CloneFragment extends BaseFragment {
         setCloneWait(true);
 
         // start custom clone mode
+        getNfc().stopMode();
         getNfc().startMode(new UICloneMode());
     }
 

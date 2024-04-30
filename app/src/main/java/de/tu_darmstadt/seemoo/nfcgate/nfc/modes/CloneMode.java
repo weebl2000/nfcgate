@@ -6,13 +6,14 @@ import de.tu_darmstadt.seemoo.nfcgate.util.NfcComm;
 public class CloneMode extends BaseMode {
     @Override
     public void onEnable() {
-        // enable polling because we are looking for a tag
-        mManager.setPollingEnabled(true);
+        // reset polling and config
+        mManager.resetConfig();
     }
 
     @Override
     public void onDisable() {
-        // no-op
+        // reset polling and config after mode ends
+        mManager.resetConfig();
     }
 
     @Override

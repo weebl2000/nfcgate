@@ -148,45 +148,46 @@ extern "C" {
         return globals.patchEnabled;
     }
 
-    JNIEXPORT void JNICALL Java_de_tu_1darmstadt_seemoo_nfcgate_xposed_Native_setConfiguration(JNIEnv *env, jobject, jbyteArray config) {
-        if (!env->IsSameObject(config, nullptr)) {
-            // parse config value stream
-            jsize config_len = env->GetArrayLength(config);
-            jbyte *config_data = env->GetByteArrayElements(config, nullptr);
-            globals.hookValues.parse(config_len, (uint8_t *) config_data);
-            env->ReleaseByteArrayElements(config, config_data, 0);
+    JNIEXPORT void JNICALL Java_de_tu_1darmstadt_seemoo_nfcgate_xposed_Native_setConfig(JNIEnv *env, jobject, jbyteArray config) {
+        // parse config value stream
+        jsize config_len = env->GetArrayLength(config);
+        jbyte *config_data = env->GetByteArrayElements(config, nullptr);
+        globals.hookValues.parse(config_len, (uint8_t *) config_data);
+        env->ReleaseByteArrayElements(config, config_data, 0);
 
-            // begin re-routing AIDs
-            globals.patchEnabled = true;
+        // begin re-routing AIDs and limiting discovery types
+        globals.patchEnabled = true;
 
-            // disable discovery before changing anything
-            nfaDisableDiscovery();
-            {
-                // apply the config stream
-                applyConfig(globals.hookValues);
-                // disable polling
-                nfaDisablePolling();
-                // enable listening only for the selected technologies
-                auto mask = maskFromConfig(globals.hookValues);
-                if (mask != 0)
-                    nfaSetListenTech(mask);
-            }
-            // re-enable discovery after changes were made
-            nfaEnableDiscovery();
-        }
-        else {
-            globals.patchEnabled = false;
-        }
-    }
-
-    JNIEXPORT void JNICALL Java_de_tu_1darmstadt_seemoo_nfcgate_xposed_Native_setPolling(JNIEnv *, jobject, jboolean enabled) {
         // disable discovery before changing anything
         nfaDisableDiscovery();
         {
-            // enable / disable polling
-            enabled ? nfaEnablePolling() : nfaDisablePolling();
+            // disable EEs that may be interfering with our config
+            disableEEs();
+            // apply the config stream
+            applyConfig(globals.hookValues);
+            // disable polling
+            nfaDisablePolling();
+            // limit discovery types only for the selected technologies
+            auto discoveryTypes = discoveryTypesFromConfig(globals.hookValues);
+            if (!discoveryTypes.empty())
+                limitDiscoveryTypes(discoveryTypes);
         }
         // re-enable discovery after changes were made
         nfaEnableDiscovery();
+    }
+
+    JNIEXPORT void JNICALL Java_de_tu_1darmstadt_seemoo_nfcgate_xposed_Native_resetConfig(JNIEnv *, jobject) {
+        if (globals.patchEnabled) {
+            // stop re-routing AIDs and limiting discovery types
+            globals.patchEnabled = false;
+            globals.discoveryTypes.clear();
+
+            // disable discovery before changing anything
+            nfaDisableDiscovery();
+            // re-enable polling
+            nfaEnablePolling();
+            // re-enable discovery after changes were made
+            nfaEnableDiscovery();
+        }
     }
 }

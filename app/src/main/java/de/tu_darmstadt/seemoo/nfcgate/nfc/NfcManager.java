@@ -52,7 +52,6 @@ public class NfcManager implements NfcAdapter.ReaderCallback, NetworkManager.Cal
 
     // state
     private boolean mReaderMode = false;
-    private boolean mPollingEnabled = true;
     private NFCTagReader mReader;
     private BaseMode mMode = null;
 
@@ -223,13 +222,10 @@ public class NfcManager implements NfcAdapter.ReaderCallback, NetworkManager.Cal
     }
 
     /**
-     * Start/stop polling for new tags
+     * Re-enables polling and resets the configuration
      */
-    public void setPollingEnabled(boolean enabled) {
-        if (mPollingEnabled != enabled)
-            mDaemon.beginSetPolling(enabled);
-
-        mPollingEnabled = enabled;
+    public void resetConfig() {
+        mDaemon.beginResetConfig();
     }
 
     /**
@@ -248,7 +244,6 @@ public class NfcManager implements NfcAdapter.ReaderCallback, NetworkManager.Cal
         if (data.isInitial()) {
             // send configuration to service, also disables polling
             mDaemon.beginSetConfig(data.getData());
-            mPollingEnabled = false;
         }
         else if (mReaderMode) {
             // send data to tag and get reply

@@ -42,10 +42,17 @@ public class DaemonManager {
     /**
      * Sets the config in the NFC Service hook
      *
-     * @param config A config stream enables the hook, null disables it
+     * @param config A config stream, enables the hook
      */
     public void beginSetConfig(byte[] config) {
         send(getIntent("SET_CONFIG").putExtra("config", config));
+    }
+
+    /**
+     * Resets the config and polling
+     */
+    public void beginResetConfig() {
+        send(getIntent("RESET_CONFIG"));
     }
 
     /**

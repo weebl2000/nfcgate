@@ -59,10 +59,10 @@ public class InjectionBroadcastWrapper extends BroadcastReceiver {
         Log.d("NATIVENFC", "Command: " + op);
 
         if ("SET_CONFIG".equals(op)) {
-            Native.Instance.setConfiguration(intent.getByteArrayExtra("config"));
+            Native.Instance.setConfig(intent.getByteArrayExtra("config"));
         }
-        else if ("SET_POLLING".equals(op)) {
-            Native.Instance.setPolling(intent.getBooleanExtra("enabled", false));
+        else if ("RESET_CONFIG".equals(op)) {
+            Native.Instance.resetConfig();
         }
         else if ("SET_CAPTURE".equals(op)) {
             mCaptureEnabled = intent.getBooleanExtra("enabled", false);

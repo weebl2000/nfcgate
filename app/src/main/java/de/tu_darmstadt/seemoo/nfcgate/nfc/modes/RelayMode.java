@@ -13,9 +13,8 @@ public class RelayMode extends BaseMode {
 
     @Override
     public void onEnable() {
-        // look for a tag in reader mode, do not look for tags in tag mode
-        mManager.setPollingEnabled(mReader);
-
+        // reset polling on start
+        mManager.resetConfig();
         // enable or disable reader mode
         mManager.setReaderMode(mReader);
 
@@ -26,8 +25,8 @@ public class RelayMode extends BaseMode {
 
     @Override
     public void onDisable() {
-        // re-enable polling if disabled
-        mManager.setPollingEnabled(true);
+        // reset polling and config after mode ends
+        mManager.resetConfig();
         // disable reader mode
         mManager.setReaderMode(false);
 

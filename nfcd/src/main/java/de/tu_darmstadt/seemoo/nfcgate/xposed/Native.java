@@ -8,6 +8,6 @@ public class Native {
 
     public native boolean isHookEnabled();
     public native boolean isPatchEnabled();
-    public native void setConfiguration(byte[] config);
-    public native void setPolling(boolean enabled);
+    public native void setConfig(byte[] config);
+    public native void resetConfig();
 }
