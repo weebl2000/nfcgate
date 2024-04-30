@@ -58,7 +58,7 @@ public:
 protected:
     std::string findLibNFC() const;
 
-    bool checkNFACBOffset(uint32_t offset);
+    bool checkNFACBOffset(uint32_t offset) const;
     uint32_t findNFACBOffset();
 
     Symbol_ref lookupSymbol(const std::string &name) const;

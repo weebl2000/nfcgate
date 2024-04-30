@@ -175,7 +175,7 @@ std::string HookGlobals::findLibNFC() const {
     return "";
 }
 
-bool HookGlobals::checkNFACBOffset(uint32_t offset) {
+bool HookGlobals::checkNFACBOffset(uint32_t offset) const {
     LOGD("checkOffset: trying offset 0x%x", offset);
 
     // try to get nfa_dm_cb[offset]
