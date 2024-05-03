@@ -163,14 +163,14 @@ extern "C" {
         {
             // disable EEs that may be interfering with our config
             disableEEs();
-            // apply the config stream
-            applyConfig(globals.hookValues);
-            // disable polling
-            nfaDisablePolling();
             // limit discovery types only for the selected technologies
             auto discoveryTypes = discoveryTypesFromConfig(globals.hookValues);
             if (!discoveryTypes.empty())
                 limitDiscoveryTypes(discoveryTypes);
+            // apply the config stream
+            applyConfig(globals.hookValues);
+            // disable polling
+            nfaDisablePolling();
         }
         // re-enable discovery after changes were made
         nfaEnableDiscovery();
