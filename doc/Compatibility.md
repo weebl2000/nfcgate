@@ -1,19 +1,33 @@
 # Compatibility
-This document states the compatibility of NFCGate's modes with different chipsets, devices, and ROM versions.
+
+This document states the compatibility of NFCGate's modes with different chipsets, devices, and ROM
+versions.
 
 ## General
-NFCGate's patch to the Android NFC service only works with devices that use the NFC NCI specification. In our testings, Broadcom or NXP NFC chipsets use this specification.
+
+NFCGate's patch to the Android NFC service only works with devices that use the NFC NCI
+specification. In our testings, Broadcom or NXP NFC chipsets use this specification.
 
 ### Determining the Chipset
+
 On the device, one can find the NFC chipset on the NFCGate status page.
 
 ### Desfire Workaround
-In previous versions of this application, NFCGate included a workaround for an Android NFC bug, that made it impossible to use with MiFare DESFire cards. This workaround is no longer part of the application due to complete code overhaul. We have not experienced the bug again. If you encounter that issue, please open an issue so the workaround can be included in the new version as well.
+
+In previous versions of this application, NFCGate included a workaround for an Android NFC bug, that
+made it impossible to use with MiFare DESFire cards. This workaround is no longer part of the
+application due to complete code overhaul. We have not experienced the bug again. If you encounter
+that issue, please open an issue so the workaround can be included in the new version as well.
 
 ### OnePlus Devices
-There are unidentified issues with applying NFC config streams. It looks like specific config stream values such as the NFCID are ignored. The NFC stack does not report errors. This leads to NFCGate not being able to emulate static tag information (i.e. NFCID), however, relay and replay functionality are still possible.
+
+There are unidentified issues with applying NFC config streams. It looks like specific config stream
+values such as the NFCID are ignored. The NFC stack does not report errors. This leads to NFCGate
+not being able to emulate static tag information (i.e. NFCID), however, relay and replay
+functionality are still possible.
 
 ## Matrix
+
 | Device                     | NFC chipset       | Android version | Android ROM version                        | Clone | On-device capture | Relay | Replay | Notes                                                 |
 |:---------------------------|:------------------|-----------------|:-------------------------------------------|:-----:|:-----------------:|:-----:|:------:|:------------------------------------------------------|
 | Google Pixel 6             | ST54J             | 14              | Stock 14 QPR3.1 (AP11.231215.009)          |   y   |         y         |   y   |   y    |                                                       |
