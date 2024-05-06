@@ -8,6 +8,7 @@ using tNFA_TECHNOLOGY_MASK = uint8_t;
 using tNCI_DISCOVERY_TYPE = uint8_t;
 // Wildcard AID selected
 #define CE_T4T_STATUS_WILDCARD_AID_SELECTED 0x40
+
 // offset to ce_cb->mem.t4t.status field (ce_int.h)
 #define CE_CB_STATUS_POST_O 0xd0
 #define CE_CB_STATUS_PRE_O 0xd8
@@ -20,6 +21,12 @@ typedef struct {
     uint8_t type;
     uint8_t frequency;
 } tNCI_DISCOVER_PARAMS;
+
+/* NFA EE status */
+#define NFA_EE_STATUS_INACTIVE 0x01
+/* NFA EE modes */
+#define NFA_EE_MD_ACTIVATE 0x01
+#define NFA_EE_MD_DEACTIVATE 0x00
 
 /* NFA Connection Callback Events */
 #define NFA_POLL_ENABLED_EVT 0

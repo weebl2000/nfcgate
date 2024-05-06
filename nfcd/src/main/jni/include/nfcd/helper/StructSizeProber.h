@@ -27,7 +27,7 @@ public:
         size_t results[NUM_PATTERNS];
 
         // detect last defined byte of the struct backwards (there may be undefined bytes left)
-        LOGD("[StructSizeProber] Detecting defined struct size with %lu", estMaxElementSize);
+        LOGD("[StructSizeProber] Detecting defined struct size with %zu", estMaxElementSize);
         mChunk.resize(estMaxElementSize);
         for (size_t i = 0; i < NUM_PATTERNS; i++)
             results[i] = detectWithPatternBackward(PATTERNS[i]);
@@ -93,14 +93,14 @@ protected:
         for (size_t i = 0; i < NUM_PATTERNS; i++) {
             size_t result = results[i];
 
-            LOGD("[StructSizeProber] Got result: %lu", result);
+            LOGD("[StructSizeProber] Got result: %zu", result);
             frequencyCount[result]++;
         }
 
         auto it = std::max_element(frequencyCount.begin(), frequencyCount.end());
         LOG_ASSERT_S(it->second > NUM_PATTERNS / 2, return 0, "No conclusive agreement could be reached");
 
-        LOGD("[StructSizeProber] Agreed to result %lu with votes: %lu", it->first, it->second);
+        LOGD("[StructSizeProber] Agreed to result %zu with votes: %zu", it->first, it->second);
         return it->first;
     }
 

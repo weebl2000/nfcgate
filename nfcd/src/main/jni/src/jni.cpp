@@ -68,56 +68,24 @@ void nfaDisablePolling() {
     waitForEvent(NFA_POLL_DISABLED_EVT);
 }
 
-size_t getEEHandleCount(size_t estMaxElementSize) {
-    uint8_t temp[estMaxElementSize];
-
-    uint8_t num_ee = 255;
-    globals.hNFA_EeGetInfo->call<def_NFA_EeGetInfo>(&num_ee, reinterpret_cast<void*>(&temp));
-    return num_ee;
-}
-
-size_t getEEStructSize(size_t eeCount, size_t estMaxElementSize) {
-    StructSizeProber prober([] (int numEE, uint8_t *dest, size_t size) {
-        uint8_t num_ee = numEE;
-        globals.hNFA_EeGetInfo->call<def_NFA_EeGetInfo>(&num_ee, dest);
-        return num_ee == numEE;
-    });
-
-    if (eeCount <= 1)
-        return estMaxElementSize;
-
-    return prober.detectStructSize(estMaxElementSize);
-}
-
-std::vector<uint16_t> getEEHandles() {
-    std::vector<uint16_t> result;
-
-    // 10KB to be safe
-    size_t estMaxElementSize = 10000;
-    // count EE entries
-    size_t eeCount = getEEHandleCount(estMaxElementSize);
-    // detect struct size
-    size_t eeStructSize = getEEStructSize(eeCount, estMaxElementSize);
-
-    if (eeCount > 0) {
-        uint8_t num_ee = 255;
-        uint8_t data[(eeStructSize + 1000) * eeCount];
-        globals.hNFA_EeGetInfo->call<def_NFA_EeGetInfo>(&num_ee, reinterpret_cast<void*>(&data));
-
-        for (size_t i = 0; i < num_ee; i++)
-            // uint16_t ee_handle is always at the start of each struct
-            result.push_back(*reinterpret_cast<uint16_t*>(data + eeStructSize * i));
-    }
-
-    return result;
-}
-
 void disableEEs() {
-    for (uint16_t eeHandle : getEEHandles()) {
-        LOGD("Disabling EE: %x", eeHandle);
+    for (uint16_t eeHandle : globals.eeManager.findActiveEEs()) {
+        LOGD("Deactivating EE: %x", eeHandle);
 
-        globals.hNFA_EeModeSet->call<def_NFA_EeModeSet>(eeHandle, 0 /* disable */);
+        globals.hNFA_EeModeSet->call<def_NFA_EeModeSet>(eeHandle, NFA_EE_MD_DEACTIVATE);
         usleep(25000);
+
+        globals.eeManager.markDeactivated(eeHandle);
+    }
+}
+void reenableEEs() {
+    for (uint16_t eeHandle : globals.eeManager.deactivatedEEs()) {
+        LOGD("Re-activating EE: %x", eeHandle);
+
+        globals.hNFA_EeModeSet->call<def_NFA_EeModeSet>(eeHandle, NFA_EE_MD_ACTIVATE);
+        usleep(25000);
+
+        globals.eeManager.markActivated(eeHandle);
     }
 }
 
@@ -186,6 +154,8 @@ extern "C" {
             nfaDisableDiscovery();
             // re-enable polling
             nfaEnablePolling();
+            // re-enable previously disabled EEs
+            reenableEEs();
             // re-enable discovery after changes were made
             nfaEnableDiscovery();
         }

@@ -2,6 +2,7 @@
 
 #include <nfcd/error.h>
 #include <nfcd/helper/Config.h>
+#include <nfcd/helper/EEManager.h>
 #include <nfcd/helper/EventQueue.h>
 #include <nfcd/helper/MapInfo.h>
 #include <nfcd/helper/StringUtil.h>
@@ -41,6 +42,7 @@ public:
     bool patchEnabled = false;
     bool guardEnabled = true;
 
+    EEManager eeManager;
     std::set<tNCI_DISCOVERY_TYPE> discoveryTypes;
 
     IHook_ref hNFC_SetConfig;
