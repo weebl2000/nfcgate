@@ -2,6 +2,13 @@ plugins {
     id 'com.android.application'
 }
 
+// load keystore properties from secure files in GitLab
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('.ci-files/release-keystore.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace 'de.tu_darmstadt.seemoo.nfcgate'
 
@@ -28,10 +35,21 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword System.getenv("SIGNING_KEYSTORE_PASSWORD")
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword System.getenv("SIGNING_KEYSTORE_KEY_PASSWORD")
+        }
+    }
+
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 

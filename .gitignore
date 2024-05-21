@@ -1,6 +1,9 @@
 .DS_Store
 /app/manifest-merger-release-report.txt
 
+# CI/CD
+.ci-files/
+
 # Gradle files
 .gradle/
 build/
@@ -28,6 +31,7 @@ render.experimental.xml
 # Keystore files
 *.jks
 *.keystore
+release-keystore.properties
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
