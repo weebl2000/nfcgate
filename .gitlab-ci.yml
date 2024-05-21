@@ -17,4 +17,6 @@ build:
     - ./gradlew assembleDebug --info
   artifacts:
     paths:
-    - app/build/outputs/
+      # collects APKs, logs, mapping/symbol files, etc.
+      - app/build/outputs/
+    name: "NFCGate-debug"

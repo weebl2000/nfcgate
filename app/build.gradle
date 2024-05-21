@@ -21,6 +21,11 @@ android {
         versionCode 9
         versionName '2.3.0'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // output full debug symbols in every configuration for stack trace symbolication
+        ndk {
+            debugSymbolLevel 'FULL'
+        }
     }
 
     buildTypes {
