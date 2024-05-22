@@ -8,6 +8,8 @@ using tNFA_TECHNOLOGY_MASK = uint8_t;
 using tNCI_DISCOVERY_TYPE = uint8_t;
 // Wildcard AID selected
 #define CE_T4T_STATUS_WILDCARD_AID_SELECTED 0x40
+// NCI OK
+#define NCI_STATUS_OK 0x00
 
 // offset to ce_cb->mem.t4t.status field (ce_int.h)
 #define CE_CB_STATUS_POST_O 0xd0
