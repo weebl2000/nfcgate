@@ -3,7 +3,8 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
+    ndkVersion '22.1.7171670'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -12,7 +13,7 @@ android {
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 33
+        targetSdkVersion 34
 
         ndk {
             moduleName 'nfcgate-native'
