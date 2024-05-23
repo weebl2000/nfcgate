@@ -11,7 +11,7 @@ public:
     /// find all currently active EEs
     std::set<uint16_t> findActiveEEs();
     /// get all manually deactivated and not yet re-activated EEs
-    const std::set<uint16_t> &deactivatedEEs() const {
+    std::set<uint16_t> deactivatedEEs() const {
         return mDeactivated;
     }
 
