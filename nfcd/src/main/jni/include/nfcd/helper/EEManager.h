@@ -9,7 +9,7 @@ class EEManager {
     static constexpr size_t estMaxElementSize = 10000;
 public:
     /// find all currently active EEs
-    std::set<uint16_t> findActiveEEs();
+    std::set<uint16_t> findActiveEEs() const;
     /// get all manually deactivated and not yet re-activated EEs
     std::set<uint16_t> deactivatedEEs() const {
         return mDeactivated;
@@ -32,7 +32,7 @@ protected:
         return mStructSize ? mStructSize : estMaxElementSize;
     }
 
-    size_t mStructSize = 0;
+    mutable size_t mStructSize = 0;
     std::set<uint16_t> mDeactivated;
 };
 

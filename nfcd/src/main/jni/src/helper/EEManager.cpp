@@ -4,15 +4,16 @@
 #include <cinttypes>
 #include <vector>
 
-std::set<uint16_t> EEManager::findActiveEEs() {
-    size_t eeCount = countEEs();
-    // detect struct size only if needed
-    if (!mStructSize)
-        mStructSize = findStructSize(eeCount);
-
+std::set<uint16_t> EEManager::findActiveEEs() const {
     std::set<uint16_t> result;
+
+    // exact number of EEs in the list
+    size_t eeCount = countEEs();
+    // approximate or exact struct size as needed
+    size_t structSize = findStructSize(eeCount);
+
     if (eeCount > 0) {
-        std::vector<uint8_t> buffer(mStructSize * eeCount);
+        std::vector<uint8_t> buffer(structSize * eeCount);
 
         uint8_t num_ee = eeCount;
         auto rv = globals.hNFA_EeGetInfo->call<def_NFA_EeGetInfo>(
@@ -20,7 +21,7 @@ std::set<uint16_t> EEManager::findActiveEEs() {
         LOG_ASSERT_S(rv == NCI_STATUS_OK, return result, "[EEManager] NFA_EeGetInfo failed for get data");
 
         for (size_t i = 0; i < num_ee; i++) {
-            uint8_t *eeInfo = buffer.data() + mStructSize * i;
+            uint8_t *eeInfo = buffer.data() + structSize * i;
 
             // uint16_t ee_handle is always at the start of each struct
             uint16_t ee_handle = *reinterpret_cast<uint16_t *>(eeInfo);
@@ -66,8 +67,14 @@ size_t EEManager::findStructSize(size_t eeCount) const {
         return num_ee == numEE;
     });
 
+    // no or one EEs, no exact struct size needed
     if (eeCount <= 1)
         return getApproxStructSize();
 
-    return prober.detectStructSize(getApproxStructSize());
+    // probe and cache struct size if needed
+    if (!mStructSize)
+        mStructSize = prober.detectStructSize(getApproxStructSize());
+
+    // return exact struct size for EE count > 1
+    return mStructSize;
 }
