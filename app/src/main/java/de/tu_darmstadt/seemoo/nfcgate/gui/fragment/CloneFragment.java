@@ -21,8 +21,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.List;
-
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.db.TagInfo;
 import de.tu_darmstadt.seemoo.nfcgate.db.model.TagInfoViewModel;
@@ -108,6 +106,13 @@ public class CloneFragment extends BaseFragment {
             if (!getNfc().isEnabled())
                 mStatusBanner.setError(getString(R.string.error_nfc_disabled));
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        getNfc().setStatusChangedHandler(null);
     }
 
     @Override
