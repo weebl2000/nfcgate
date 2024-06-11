@@ -20,7 +20,7 @@ class StructSizeProber {
 public:
     using GetElements_t = std::function<bool(int, uint8_t*, size_t)>;
 
-    StructSizeProber(const GetElements_t &getElements) : mGetElements(getElements) { }
+    explicit StructSizeProber(GetElements_t getElements) : mGetElements(std::move(getElements)) { }
 
     size_t detectStructSize(size_t estMaxElementSize) {
         LOG_ASSERT_S(estMaxElementSize % 2 == 0, return 0, "Odd estimated element size");
@@ -104,7 +104,7 @@ protected:
         return it->first;
     }
 
-    const GetElements_t &mGetElements;
+    GetElements_t mGetElements;
     std::vector<uint8_t> mChunk;
 };
 
