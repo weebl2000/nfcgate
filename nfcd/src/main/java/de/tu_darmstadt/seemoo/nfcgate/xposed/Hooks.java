@@ -74,7 +74,7 @@ public class Hooks implements IXposedHookLoadPackage {
             });
 
             // hook 'transceive' method for on-device capture of request/response data
-            findAndHookMethod("com.android.nfc.NfcService.TagService", lpparam.classLoader,
+            findAndHookMethod("com.android.nfc.NfcService$TagService", lpparam.classLoader,
                     "transceive",
                     int.class, byte[].class, boolean.class, new XC_MethodHook() {
                 @Override
