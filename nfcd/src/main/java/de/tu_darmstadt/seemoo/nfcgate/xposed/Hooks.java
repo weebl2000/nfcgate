@@ -87,7 +87,7 @@ public class Hooks implements IXposedHookLoadPackage {
                         byte[] responseData = (byte[]) param.getResult().getClass().getMethod("getResponseOrThrow").invoke(param.getResult());
                         addCaptureData(true, responseData);
 
-                        Log.d("HOOKNFC", "Captured tag read");
+                        Log.i("HOOKNFC", "Captured tag read");
                     }
 
                 }
@@ -104,7 +104,7 @@ public class Hooks implements IXposedHookLoadPackage {
                         Tag tag = (Tag) param.args[0];
                         addCaptureInitial(tag);
 
-                        Log.d("HOOKNFC", "Captured initial data");
+                        Log.i("HOOKNFC", "Captured initial data");
                     }
                 }
             });
@@ -120,7 +120,7 @@ public class Hooks implements IXposedHookLoadPackage {
                         byte[] commandData = (byte[]) param.args[0];
                         addCaptureData(false, commandData);
 
-                        Log.d("HOOKNFC", "Captured HCE request");
+                        Log.i("HOOKNFC", "Captured HCE request");
                     }
                 }
             });
@@ -135,7 +135,7 @@ public class Hooks implements IXposedHookLoadPackage {
                     if (isCaptureEnabled()) {
                         addCaptureInitial(null);
 
-                        Log.d("HOOKNFC", "Captured HCE initial data");
+                        Log.i("HOOKNFC", "Captured HCE initial data");
                     }
                 }
             });
@@ -151,7 +151,7 @@ public class Hooks implements IXposedHookLoadPackage {
                         byte[] responseData = (byte[]) param.args[0];
                         addCaptureData(true, responseData);
 
-                        Log.d("HOOKNFC", "Captured HCE response");
+                        Log.i("HOOKNFC", "Captured HCE response");
                     }
                 }
             });

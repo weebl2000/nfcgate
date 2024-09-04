@@ -25,7 +25,7 @@ public class InjectionBroadcastWrapper extends BroadcastReceiver {
 
         // load our native library
         loadForeignLibrary(ctx, "de.tu_darmstadt.seemoo.nfcgate", "nfcgate");
-        Log.d("HOOKNFC", isHookEnabled() ? "Native hook success" : "Native hook failed (for now)");
+        Log.i("HOOKNFC", isHookEnabled() ? "Native hook success" : "Native hook failed (for now)");
 
         // start broadcast receiver on handler thread
         HandlerThread ht = new HandlerThread("ht");
@@ -56,7 +56,7 @@ public class InjectionBroadcastWrapper extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String op = intent.getStringExtra("op");
-        Log.d("NATIVENFC", "Command: " + op);
+        Log.i("NATIVENFC", "Command: " + op);
 
         if ("SET_CONFIG".equals(op)) {
             Native.Instance.setConfig(intent.getByteArrayExtra("config"));
