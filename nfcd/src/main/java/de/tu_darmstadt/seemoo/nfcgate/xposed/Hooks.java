@@ -15,6 +15,7 @@ import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
+import de.tu_darmstadt.seemoo.nfcgate.util.Utils;
 
 import static de.robv.android.xposed.XposedHelpers.findAndHookConstructor;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
@@ -36,6 +37,7 @@ public class Hooks implements IXposedHookLoadPackage {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) {
 
+                    Log.i("HOOKNFC", "launching InjectionBroadcastWrapper");
                     // using context, inject our class into the nfc service class loader
                     mReceiver = loadOrInjectClass((Application) param.args[0],
                             "de.tu_darmstadt.seemoo.nfcgate", getClass().getClassLoader(),
@@ -48,13 +50,22 @@ public class Hooks implements IXposedHookLoadPackage {
                     "findSelectAid",
                     byte[].class, new XC_MethodHook() {
                 @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    Log.i("HOOKNFC", "HostEmulationManager::findSelectAid; data: " + Utils.bytesToHex((byte[]) param.args[0]));
+                    super.beforeHookedMethod(param);
+                }
+
+                @Override
                 protected void afterHookedMethod(MethodHookParam param) {
+                    Log.i("HOOKNFC", "HostEmulationManager::findSelectAid; old result: " + param.getResult());
 
                     if (isPatchEnabled()) {
                         // setting a result will overwrite the original result
                         // F0010203040506 is an aid registered by the nfcgate hce service
                         param.setResult("F0010203040506");
-                    }
+                        Log.i("HOOKNFC", "HostEmulationManager::findSelectAid; changing result to F0010203040506");
+                    } else
+                        Log.i("HOOKNFC", "HostEmulationManager::findSelectAid; patch not enabled, not changing AID");
                 }
             });
 
@@ -79,7 +90,6 @@ public class Hooks implements IXposedHookLoadPackage {
                     int.class, byte[].class, boolean.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-
                     if (isCaptureEnabled()) {
                         byte[] commandData = (byte[]) param.args[1];
                         addCaptureData(false, commandData);
