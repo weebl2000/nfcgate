@@ -41,14 +41,20 @@ public class InjectionBroadcastWrapper extends BroadcastReceiver {
         return Native.Instance.isHookEnabled();
     }
 
+    /** @noinspection unused*/
+    // used by Hooks
     public boolean isPatchEnabled() {
         return Native.Instance.isPatchEnabled();
     }
 
+    /** @noinspection unused*/
+    // used by Hooks
     public boolean isCaptureEnabled() {
         return mCaptureEnabled;
     }
 
+    /** @noinspection unused*/
+    // used by Hooks
     public void addCapture(Bundle capture) {
         mCaptured.add(capture);
     }
