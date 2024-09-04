@@ -9,11 +9,14 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.TreeMap;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
+import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 import de.tu_darmstadt.seemoo.nfcgate.util.Utils;
 
@@ -23,6 +26,7 @@ import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 public class Hooks implements IXposedHookLoadPackage {
 
     private Object mReceiver;
+    private Object mNfcServiceInstance;
 
     public void handleLoadPackage(final LoadPackageParam lpparam) {
         // hook our own NfcManager to indicate that the hook is loaded and active
@@ -36,6 +40,8 @@ public class Hooks implements IXposedHookLoadPackage {
                     Application.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) {
+                    // save nfc service instance for later
+                    mNfcServiceInstance = param.thisObject;
 
                     Log.i("HOOKNFC", "launching InjectionBroadcastWrapper");
                     // using context, inject our class into the nfc service class loader
@@ -109,6 +115,7 @@ public class Hooks implements IXposedHookLoadPackage {
                     Tag.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) {
+                    dumpAIDRegistrations();
 
                     if (isCaptureEnabled()) {
                         Tag tag = (Tag) param.args[0];
@@ -141,6 +148,7 @@ public class Hooks implements IXposedHookLoadPackage {
                     new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) {
+                    dumpAIDRegistrations();
 
                     if (isCaptureEnabled()) {
                         addCaptureInitial(null);
@@ -211,6 +219,29 @@ public class Hooks implements IXposedHookLoadPackage {
             mReceiver.getClass().getMethod("addCapture", Bundle.class).invoke(mReceiver, capture);
         } catch (Exception e) {
             Log.e("HOOKNFC", "Failed to get addCaptureData", e);
+        }
+    }
+
+    private void dumpAIDRegistrations() {
+        try {
+            Object nfcService = mNfcServiceInstance;
+
+            // Get mCardEmulationManager field of NfcService instance
+            Field cardEmulationManager = XposedHelpers.findField(nfcService.getClass(), "mCardEmulationManager");
+            Object cardEmulationManagerObj = cardEmulationManager.get(nfcService);
+
+            // Get mAidCache field of CardEmulationManager instance
+            Field aidCache = XposedHelpers.findField(cardEmulationManagerObj.getClass(), "mAidCache");
+            Object aidCacheObj = aidCache.get(cardEmulationManagerObj);
+
+            // Get mAidCache field of RegisteredAidCache instance. This field maps AIDs to AidResolveInfo.
+            Field cacheMap = XposedHelpers.findField(aidCacheObj.getClass(), "mAidCache");
+            TreeMap<String, ? extends Object> cacheMapObj = ((TreeMap<String, ? extends Object>) cacheMap.get(aidCacheObj));
+
+            // AidResolveInfo implements toString, so we just dump the whole TreeMap
+            Log.i("HOOKNFC", "AID reg dump:" + cacheMapObj.toString());
+        } catch (Exception e) {
+            Log.e("HOOKNFC", "AID reg dump failed", e);
         }
     }
 
