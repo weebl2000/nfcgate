@@ -9,21 +9,29 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
+import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 import de.tu_darmstadt.seemoo.nfcgate.util.Utils;
 
-import static de.robv.android.xposed.XposedHelpers.findAndHookConstructor;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
 public class Hooks implements IXposedHookLoadPackage {
+    private interface NfcServiceConstructorHook {
+        void afterHookedMethod(XC_MethodHook.MethodHookParam param);
+    }
 
     private Object mReceiver;
     private Object mNfcServiceInstance;
@@ -36,14 +44,18 @@ public class Hooks implements IXposedHookLoadPackage {
                     "isModuleLoaded", XC_MethodReplacement.returnConstant(true));
         } else if ("com.android.nfc".equals(lpparam.packageName)) {
             // hook constructor to catch application context
-            findAndHookConstructor("com.android.nfc.NfcService", lpparam.classLoader,
-                    Application.class, new XC_MethodHook() {
+            hookNfcServiceConstructor(lpparam.classLoader, new NfcServiceConstructorHook() {
                 @Override
-                protected void afterHookedMethod(MethodHookParam param) {
+                public void afterHookedMethod(XC_MethodHook.MethodHookParam param) {
+                    // only execute once
+                    if (mNfcServiceInstance != null)
+                        return;
+
+                    Log.i("HOOKNFC", "Launching InjectionBroadcastWrapper");
+
                     // save nfc service instance for later
                     mNfcServiceInstance = param.thisObject;
 
-                    Log.i("HOOKNFC", "launching InjectionBroadcastWrapper");
                     // using context, inject our class into the nfc service class loader
                     mReceiver = loadOrInjectClass((Application) param.args[0],
                             "de.tu_darmstadt.seemoo.nfcgate", getClass().getClassLoader(),
@@ -294,5 +306,55 @@ public class Hooks implements IXposedHookLoadPackage {
         }
 
         return null;
+    }
+
+    /// Finds the NFCService constructor, hooks it and calls the hook only if the application context is a parameter
+    private void hookNfcServiceConstructor(ClassLoader classLoader, NfcServiceConstructorHook hook) {
+        Class<?> nfcServiceClass = findSpecificNfcService(classLoader);
+        if (nfcServiceClass == null)
+            return;
+
+        Log.i("HOOKNFC", "Specific NfcService selected: " + nfcServiceClass.getSimpleName());
+        XposedBridge.hookAllConstructors(nfcServiceClass, new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) {
+                Log.i("HOOKNFC", "NfcService constructor called: " + toGenericString(param.method));
+
+                if (param.args.length > 0 && isOfClass(param.args[0], Context.class))
+                    hook.afterHookedMethod(param);
+                else
+                    Log.e("HOOKNFC", "NfcService constructor called without Application context");
+            }
+        });
+    }
+
+    /// Finds the most specific NFCService class that exists
+    private Class<?> findSpecificNfcService(ClassLoader classLoader) {
+        List<String> candidates = List.of(
+                "com.android.nfc.LNfcService",
+                "com.android.nfc.NfcService"
+        );
+
+        for (String candidate : candidates) {
+            Class<?> clazz = XposedHelpers.findClassIfExists(candidate, classLoader);
+            if (clazz != null)
+                return clazz;
+        }
+
+        Log.e("HOOKNFC", "Failed to find NfcService class");
+        return null;
+    }
+
+    private String toGenericString(Member member) {
+        if (member instanceof Constructor)
+            return ((Constructor<?>) member).toGenericString();
+        else if (member instanceof Method)
+            return ((Method) member).toGenericString();
+        else
+            return "Unknown member " + member.getName() + " with type " + member.getClass().getSimpleName();
+    }
+
+    private boolean isOfClass(Object a, Class<?> clazz) {
+        return a != null && clazz.isInstance(a);
     }
 }
