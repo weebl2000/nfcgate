@@ -20,7 +20,6 @@ import android.widget.TextView;
 
 import com.jaredrummler.android.device.DeviceName;
 
-
 import de.tu_darmstadt.seemoo.nfcgate.BuildConfig;
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.gui.component.CustomArrayAdapter;
@@ -133,12 +132,14 @@ public class StatusFragment extends BaseFragment {
 
     StatusItem detectDeviceName() {
         // transform code name into market name
-        String deviceName = DeviceName.getDeviceName();
+        String marketName = DeviceName.getDeviceName(Build.DEVICE, Build.MODEL, null);
+        String marketNameOptional = !Build.MODEL.equalsIgnoreCase(marketName) ? " (" + marketName + ")" : "";
+        String value = String.format("%s [%s]%s", Build.MODEL, Build.DEVICE, marketNameOptional);
         // device name should be OK for all supported devices
-        StatusItem result = new StatusItem(getContext(), getString(R.string.status_devname)).setValue(deviceName);
+        StatusItem result = new StatusItem(getContext(), getString(R.string.status_devname)).setValue(value);
 
         // No hist byte on this specific combination
-        if (deviceName.equals("Nexus 5X") && Build.VERSION.RELEASE.equals("6.0.1"))
+        if ("Nexus 5X".equals(Build.MODEL) && Build.VERSION.RELEASE.equals("6.0.1"))
             result.setWarn(getString(R.string.warn_5X601));
 
         return result;
