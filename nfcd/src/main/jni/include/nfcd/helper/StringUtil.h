@@ -6,6 +6,13 @@
 
 class StringUtil {
 public:
+    static std::string toLower(const std::string &s) {
+        std::string result;
+        std::transform(s.begin(), s.end(), std::back_inserter(result), ::tolower);
+
+        return result;
+    }
+
     static bool strContains(const std::string &s, const std::string &q) {
         return s.find(q) != std::string::npos;
     }

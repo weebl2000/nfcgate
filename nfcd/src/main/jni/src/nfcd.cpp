@@ -196,8 +196,8 @@ HookGlobals::HookGlobals() {
 
 std::string HookGlobals::findLibNFC() const {
     for (const auto &candidate : mapInfo.loadedLibraries()) {
-        // library path must contain "nfc" somewhere
-        if (!StringUtil::strContains(candidate, "nfc"))
+        // library path must contain "nfc" case insensitive somewhere
+        if (!StringUtil::strContains(StringUtil::toLower(candidate), "nfc"))
             continue;
 
         LOGD("findLibNFC: candidate contains 'nfc', checking symbols: %s", candidate.c_str());
@@ -226,7 +226,7 @@ bool HookGlobals::checkNFACBOffset(uint32_t offset) const {
          *p_nfa_conn_cback, rangeInfo->perms, rangeInfo->label.c_str());
     LOG_ASSERT_S((rangeInfo->perms & 1) == 1, return false,
                  "p_conn_cback permissions not execute, offset likely invalid");
-    LOG_ASSERT_S(rangeInfo->label.find("jni") != std::string::npos, return false,
+    LOG_ASSERT_S(StringUtil::strContains(StringUtil::toLower(rangeInfo->label), "jni"), return false,
                  "p_conn_cback not in JNI object, offset likely invalid");
 
     LOGD("checkOffset: success");
