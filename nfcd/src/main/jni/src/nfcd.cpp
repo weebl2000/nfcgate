@@ -196,6 +196,8 @@ HookGlobals::HookGlobals() {
 
 std::string HookGlobals::findLibNFC() const {
     for (const auto &candidate : mapInfo.loadedLibraries()) {
+        LOGD("findLibNFC: candidate: %s", candidate.c_str());
+
         // library path must contain "nfc" case insensitive somewhere
         if (!StringUtil::strContains(StringUtil::toLower(candidate), "nfc"))
             continue;
