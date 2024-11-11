@@ -22,28 +22,36 @@ public:
 
     explicit StructSizeProber(GetElements_t getElements) : mGetElements(std::move(getElements)) { }
 
-    size_t detectStructSize(size_t estMaxElementSize) {
+    size_t detectStructSize(size_t elementCount, size_t estMaxElementSize) {
         LOG_ASSERT_S(estMaxElementSize % 2 == 0, return 0, "Odd estimated element size");
-        size_t results[NUM_PATTERNS];
+        size_t result = estMaxElementSize;
 
-        // detect last defined byte of the struct backwards (there may be undefined bytes left)
-        LOGD("[StructSizeProber] Detecting defined struct size with %zu", estMaxElementSize);
-        mChunk.resize(estMaxElementSize);
-        for (size_t i = 0; i < NUM_PATTERNS; i++)
-            results[i] = detectWithPatternBackward(PATTERNS[i]);
+        if (elementCount > 0) {
+            // detect last defined byte of the struct backwards (there may be undefined bytes left)
+            LOGD("[StructSizeProber] Detecting defined struct size with %zu", estMaxElementSize);
+            mChunk.resize(estMaxElementSize);
 
-        size_t definedSize = agreeResults(results);
-        LOG_ASSERT_S(definedSize != 0, return 0, "Could not detect defined size");
+            std::vector<size_t> results;
+            for (size_t i = 0; i < NUM_PATTERNS; i++)
+                results.push_back(detectWithPatternBackward(PATTERNS[i]));
 
-        // detect struct size starting from last defined byte
-        LOGD("[StructSizeProber] Detecting final struct size");
-        mChunk.resize(estMaxElementSize * 2);
-        for (size_t i = 0; i < NUM_PATTERNS; i++)
-            results[i] = detectWithPatternForward(PATTERNS[i], definedSize);
+            result = agreeResults(results);
+            LOG_ASSERT_S(result != 0, return 0, "Could not detect defined size");
+        }
+        if (elementCount > 1) {
+            // detect struct size starting from last defined byte
+            LOGD("[StructSizeProber] Detecting final struct size");
+            mChunk.resize(estMaxElementSize * 2);
 
-        size_t structSize = agreeResults(results);
-        LOG_ASSERT_S(definedSize != 0, return 0, "Could not detect struct size");
-        return structSize;
+            std::vector<size_t> results;
+            for (size_t i = 0; i < NUM_PATTERNS; i++)
+                results.push_back(detectWithPatternForward(PATTERNS[i], result));
+
+            result = agreeResults(results);
+            LOG_ASSERT_S(result != 0, return 0, "Could not detect struct size");
+        }
+
+        return result;
     }
 
 protected:
@@ -86,13 +94,11 @@ protected:
         return 0;
     }
 
-    size_t agreeResults(size_t results[NUM_PATTERNS]) {
+    size_t agreeResults(const std::vector<size_t> &results) {
         std::unordered_map<size_t, size_t> frequencyCount;
 
         // increase count for each result
-        for (size_t i = 0; i < NUM_PATTERNS; i++) {
-            size_t result = results[i];
-
+        for (size_t result : results) {
             LOGD("[StructSizeProber] Got result: %zu", result);
             frequencyCount[result]++;
         }

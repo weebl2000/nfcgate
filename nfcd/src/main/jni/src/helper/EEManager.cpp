@@ -67,14 +67,10 @@ size_t EEManager::findStructSize(size_t eeCount) const {
         return num_ee == numEE;
     });
 
-    // no or one EEs, no exact struct size needed
-    if (eeCount <= 1)
-        return getApproxStructSize();
-
     // probe and cache struct size if needed
     if (!mStructSize)
-        mStructSize = prober.detectStructSize(getApproxStructSize());
+        mStructSize = prober.detectStructSize(eeCount, getApproxStructSize());
 
-    // return exact struct size for EE count > 1
+    // return exact struct size for eeCount > 0
     return mStructSize;
 }
