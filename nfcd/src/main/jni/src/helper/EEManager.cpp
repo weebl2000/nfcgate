@@ -26,10 +26,29 @@ std::set<uint16_t> EEManager::findActiveEEs() const {
             // uint16_t ee_handle is always at the start of each struct
             uint16_t ee_handle = *reinterpret_cast<uint16_t *>(eeInfo);
             // uint8_t ee_status is always at offset 2 in each struct
-            uint8_t ee_status = *reinterpret_cast<uint16_t *>(eeInfo + sizeof(uint16_t));
+            uint8_t ee_status = *reinterpret_cast<uint16_t *>(eeInfo + sizeof(uint8_t) * 2);
+            // uint8_t num_interface + uint8_t[] ee_interface is always at offset 3
+            uint8_t num_interface = *reinterpret_cast<uint8_t *>(eeInfo + sizeof(uint8_t) * 3);
+            std::vector<uint8_t> ee_interface;
+            for (size_t j = 0; j < num_interface; j++)
+                ee_interface.push_back(*reinterpret_cast<uint8_t *>(eeInfo + sizeof(uint8_t) * (4 + j)));
+            // uint8_t la_protocol is always at offset -3 from the end of each struct
+            uint8_t la_protocol = *reinterpret_cast<uint8_t *>(eeInfo + structSize - sizeof(uint8_t) * 3);
+            // uint8_t lb_protocol is always at offset -2 from the end of each struct
+            uint8_t lb_protocol = *reinterpret_cast<uint8_t *>(eeInfo + structSize - sizeof(uint8_t) * 2);
+            // uint8_t lf_protocol is always at offset -1 from the end of each struct
+            uint8_t lf_protocol = *reinterpret_cast<uint8_t *>(eeInfo + structSize - sizeof(uint8_t) * 1);
 
-            // only non-deactivated EEs
-            if (ee_status != NFA_EE_STATUS_INACTIVE)
+            // debug info
+            std::string str_ee_interfaces;
+            for (auto ef : ee_interface)
+                str_ee_interfaces += (str_ee_interfaces.empty() ? "" : ",") + std::to_string(ef);
+            LOGD("EE found: %x with {status=%d, ee_interface=[%s], la_protocol=%d, lb_protocol=%d, lf_protocol=%d}",
+                 ee_handle, ee_status, str_ee_interfaces.c_str(), la_protocol, lb_protocol, lf_protocol);
+
+            // only non-deactivated proprietary EEs
+            auto itProp = std::find(ee_interface.begin(), ee_interface.end(), NCI_NFCEE_INTERFACE_PROPRIETARY);
+            if (ee_status != NFA_EE_STATUS_INACTIVE && itProp != ee_interface.end())
                 result.insert(ee_handle);
         }
     }

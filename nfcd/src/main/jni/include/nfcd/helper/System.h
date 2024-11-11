@@ -59,6 +59,10 @@ typedef struct {
 #define NCI_DISCOVERY_TYPE_LISTEN_F_ACTIVE 0x85
 #define NCI_DISCOVERY_TYPE_LISTEN_ISO15693 0x86
 
+/* EE interface types */
+#define NCI_NFCEE_INTERFACE_PROPRIETARY 0x80
+
+
 class System {
 public:
     enum SdkVersion {
