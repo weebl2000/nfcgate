@@ -12,7 +12,7 @@ file(GLOB_RECURSE NFCD_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h)
 file(GLOB_RECURSE NFCD_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 # cxx standard
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 # compile library
 add_library(nfcgate SHARED ${NFCD_HEADERS} ${NFCD_SOURCES})
