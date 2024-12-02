@@ -222,13 +222,13 @@ bool HookGlobals::checkNFACBOffset(uint32_t offset) const {
     auto **p_nfa_conn_cback = (def_NFA_CONN_CBACK**)(nfa_dm_cb->address<uint8_t>() + offset);
     LOG_ASSERT_S(*p_nfa_conn_cback, return false, "p_conn_cback is null, offset may be invalid");
 
-    auto rangeInfo = mapInfo.rangeFromAddress(reinterpret_cast<uintptr_t>(*p_nfa_conn_cback));
-    LOG_ASSERT_S(rangeInfo, return false, "p_conn_cback range info invalid");
+    auto lookup = mapInfo.lookupRange(reinterpret_cast<uintptr_t>(*p_nfa_conn_cback));
+    LOG_ASSERT_S(lookup, return false, "p_conn_cback lookup invalid");
     LOGD("checkOffset: candidate p_conn_cback %p with permissions %d in object file %s",
-         *p_nfa_conn_cback, rangeInfo->perms, rangeInfo->label.c_str());
-    LOG_ASSERT_S((rangeInfo->perms & 1) == 1, return false,
+         *p_nfa_conn_cback, lookup.range->perms, lookup.library->label.c_str());
+    LOG_ASSERT_S((lookup.range->perms & 1) == 1, return false,
                  "p_conn_cback permissions not execute, offset likely invalid");
-    LOG_ASSERT_S(StringUtil::strContains(StringUtil::toLower(rangeInfo->label), "jni"), return false,
+    LOG_ASSERT_S(StringUtil::strContains(StringUtil::toLower(lookup.library->label), "jni"), return false,
                  "p_conn_cback not in JNI object, offset likely invalid");
 
     LOGD("checkOffset: success");

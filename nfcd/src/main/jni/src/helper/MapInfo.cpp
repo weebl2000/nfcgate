@@ -10,13 +10,17 @@ bool MapInfo::create() {
     int rv = dl_iterate_phdr([] (struct dl_phdr_info *info, size_t, void *user_data) {
         auto *instance = (MapInfo *)user_data;
 
+        // map library name to new library entry with base address
+        auto &entry = *instance->mLibraryData.try_emplace(info->dlpi_name, info->dlpi_addr, info->dlpi_name).first;
         for (size_t i = 0; i < info->dlpi_phnum; i++) {
-            instance->mRanges.push_back(RangeData {
-                info->dlpi_addr + info->dlpi_phdr[i].p_vaddr,
-                info->dlpi_addr + info->dlpi_phdr[i].p_vaddr + info->dlpi_phdr[i].p_memsz,
-                static_cast<uint8_t>(info->dlpi_phdr[i].p_flags),
-                info->dlpi_name
-            });
+            entry.second.ranges.emplace_back(
+                    // range start address
+                    info->dlpi_addr + info->dlpi_phdr[i].p_vaddr,
+                    // range end address
+                    info->dlpi_addr + info->dlpi_phdr[i].p_vaddr + info->dlpi_phdr[i].p_memsz,
+                    // range permissions
+                    static_cast<uint8_t>(info->dlpi_phdr[i].p_flags)
+            );
         }
 
         return 0;
@@ -29,37 +33,25 @@ bool MapInfo::create() {
 std::set<std::string> MapInfo::loadedLibraries() const {
     std::set<std::string> result;
 
-    for (auto &range : mRanges) {
-        result.emplace(range.label);
-    }
+    for (auto &it : mLibraryData)
+        result.emplace(it.first);
 
     return result;
 }
 
 void *MapInfo::getBaseAddress(const std::string &library) const {
-    for (auto &range : mRanges) {
-        // skip range that does not match the library
-        if (!StringUtil::strEndsWith(range.label, library))
-            continue;
-
-        // skip range without read permission or without enough space for ELF header
-        if ((range.perms & 4) != 4 || range.end - range.start <= 4)
-            continue;
-
-        // check ELF magic bytes to confirm this region as the base
-        if (memcmp((void *)range.start, "\x7f" "ELF", 4) != 0)
-            continue;
-
-        return (void *)range.start;
-    }
+    auto it = mLibraryData.find(library);
+    if (it != mLibraryData.end())
+        return reinterpret_cast<void*>(it->second.base);
 
     return nullptr;
 }
 
-const MapInfo::RangeData *MapInfo::rangeFromAddress(uintptr_t addr, uint64_t size) const {
-    for (auto &range : mRanges)
-        if (addr >= range.start && (addr + size) <= range.end)
-            return &range;
+MapInfo::LookupResult MapInfo::lookupRange(uintptr_t address, uint64_t size) const {
+    for (auto &it : mLibraryData)
+        for (auto &range : it.second.ranges)
+            if (address >= range.start && (address + size) <= range.end)
+                return {&it.second, &range};
 
-    return nullptr;
+    return {};
 }

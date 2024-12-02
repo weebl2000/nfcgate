@@ -206,7 +206,7 @@ protected:
     }
 
     // current base address
-    uint8_t *mBase;
+    uint8_t *mBase = nullptr;
     // lowest address of all PT_LOADs to relocate against
     size_t mLowestLoad = 0;
 
