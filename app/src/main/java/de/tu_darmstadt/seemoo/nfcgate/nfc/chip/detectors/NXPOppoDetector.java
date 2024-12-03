@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.tu_darmstadt.seemoo.nfcgate.nfc.chip.NfcChipGuess;
+
 /**
  * NXP NFC chip name detector.
  * Specifically made to parse the complex NXP config system of
@@ -86,6 +88,14 @@ public class NXPOppoDetector extends NXPDetector {
         List<String> candidates = findConfigs(Arrays.asList("nfc_conf_ref"));
         return !candidates.isEmpty() ? candidates.get(0) : null;
     }
+    /**
+     * Finds the nfc_fw_ref file in one of the nfc/ folders.
+     * This file contains the nfc firmware file associations
+     */
+    String getFwRefPath() {
+        List<String> candidates = findConfigs(Arrays.asList("nfc_fw_ref"));
+        return !candidates.isEmpty() ? candidates.get(0) : null;
+    }
 
     /**
      * Parse the nfc_conf_ref table from its path into a searchable table
@@ -128,23 +138,24 @@ public class NXPOppoDetector extends NXPDetector {
         return Arrays.asList(
                 getSystemProp("ro.separate.soft"),
                 getSystemProp("ro.build.product"),
+                getFileContents("/proc/oplusVersion/prjName"),
                 getFileContents("/proc/oppoVersion/prjName"),
+                getFileContents("/proc/oplusVersion/prjVersion"),
                 getFileContents("/proc/oppoVersion/prjVersion")
         );
     }
 
     /**
-     * Get config file suffix for the nfc subfolder for this device.
+     * Get file suffix for the nfc subfolder for this device.
      */
-    String getConfigSuffix() {
-        // find path to nfc_conf_ref containing the mapping
-        String confRefPath = getConfRefPath();
-        if (confRefPath == null || confRefPath.isEmpty())
+    String getRefSuffix(String refPath) {
+        // check path to ref file containing a mapping
+        if (refPath == null || refPath.isEmpty())
             return null;
-        Log.d("NFCCONFIG", String.format("Got nfc_conf_ref at %s", confRefPath));
+        Log.d("NFCCONFIG", String.format("Got ref path at %s", refPath));
 
         // parse the mapping into a convenient table
-        ConfigTable configTable = parseTable(confRefPath);
+        ConfigTable configTable = parseTable(refPath);
         if (configTable == null)
             return null;
         Log.d("NFCCONFIG", String.format("Got config table: %s", configTable));
@@ -152,11 +163,11 @@ public class NXPOppoDetector extends NXPDetector {
         // for each project name that this device could be known under in the mapping
         for (String candidate : getProjectNameCandidates()) {
             Log.d("NFCCONFIG", String.format("Checking candidate %s", candidate));
-            String targetConfig = configTable.findTargetByProjectName(candidate);
+            String suffix = configTable.findTargetByProjectName(candidate);
 
-            // if a target config was found for one of the project names, return it
-            if (targetConfig != null && !targetConfig.isEmpty())
-                return targetConfig;
+            // if a suffix was found for one of the project names, return it
+            if (suffix != null && !suffix.isEmpty())
+                return suffix;
         }
 
         return null;
@@ -167,13 +178,40 @@ public class NXPOppoDetector extends NXPDetector {
         List<String> result = super.getConfigFilenames();
 
         // add suffixed file in the nfc subfolder to the list, with the suffix for this device
-        String configSuffix = getConfigSuffix();
+        String configSuffix = getRefSuffix(getConfRefPath());
         if (configSuffix != null) {
-            Log.d("NFCCONFIG", String.format("Found suffix %s", configSuffix));
+            Log.d("NFCCONFIG", String.format("Found config suffix %s", configSuffix));
             result.add("libnfc-nxp.conf_" + configSuffix);
         }
 
         return result;
+    }
+
+    @Override
+    public List<NfcChipGuess> tryDetect() {
+        List<NfcChipGuess> result = super.tryDetect();
+
+        // add our guess based on the firmware file if the ref file exists
+        String firmwareSuffix = getRefSuffix(getFwRefPath());
+        if (firmwareSuffix != null) {
+            Log.d("NFCCONFIG", String.format("Found firmware suffix %s", firmwareSuffix));
+
+            String chipName = getChipNameFromFirmwareSuffix(firmwareSuffix);
+            result.add(new NfcChipGuess(chipName, 0.91f));
+        }
+
+        return result;
+    }
+
+    /**
+     * Extract the likely chip name from the firmware suffix
+     *
+     * @param firmwareSuffix Suffix to extract the chip name from, e.g. sn220tu_fw_01_01_2B
+     * @return The likely chip name
+     */
+    protected static String getChipNameFromFirmwareSuffix(String firmwareSuffix) {
+        String[] parts = firmwareSuffix.split("_", 2);
+        return parts[0].toUpperCase();
     }
 
     /**
