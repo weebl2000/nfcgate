@@ -9,6 +9,12 @@ public class NfcChipGuess {
     // confidence in the guess, ranges 0-1 in percent
     public float confidence = 0;
 
+    public NfcChipGuess() { }
+    public NfcChipGuess(String chipName, float confidence) {
+        this.chipName = chipName;
+        this.confidence = confidence;
+    }
+
     /**
      * Only set value if it improves the confidence
      *
