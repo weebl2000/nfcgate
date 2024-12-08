@@ -44,7 +44,7 @@ public class StatusFragment extends BaseFragment {
         // custom toolbar actions
         setHasOptionsMenu(true);
         // set version as subtitle
-        getMainActivity().getSupportActionBar().setSubtitle(getString(R.string.about_version, BuildConfig.VERSION_NAME));
+        getMainActivity().getSupportActionBar().setSubtitle(getString(R.string.about_version, AboutFragment.getVersionNameGit()));
 
         // handlers
         mStatus.setOnItemClickListener(new AdapterView.OnItemClickListener() {

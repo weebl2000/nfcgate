@@ -18,12 +18,19 @@ import mehdi.sakout.aboutpage.Element;
 import de.tu_darmstadt.seemoo.nfcgate.R;
 
 public class AboutFragment extends Fragment {
+    public static String getVersionNameGit() {
+        if (!BuildConfig.GIT_COMMIT_HASH.isEmpty())
+            return String.format("%s (%s)", BuildConfig.VERSION_NAME, BuildConfig.GIT_COMMIT_HASH);
+        else
+            return BuildConfig.VERSION_NAME;
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // custom elements
         Element versionElement = new Element()
                 .setIconDrawable(R.drawable.ic_about_black_24dp)
-                .setTitle(getString(R.string.about_version, BuildConfig.VERSION_NAME));
+                .setTitle(getString(R.string.about_version, getVersionNameGit()));
         Element licenseElement = new Element()
                 .setIconDrawable(R.drawable.ic_copyright_black_24dp)
                 .setIntent(new Intent()

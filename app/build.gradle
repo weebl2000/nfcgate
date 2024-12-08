@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id 'com.palantir.git-version' version '3.1.0' apply(false)
 }
 
 // load keystore properties from secure files in GitLab
@@ -29,10 +30,25 @@ android {
         versionName '2.4.2'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
+        // add Git information to BuildConfig if .git directory present
+        if (new File(rootProject.projectDir, ".git").exists()) {
+            apply plugin: 'com.palantir.git-version'
+            buildConfigField 'String', 'GIT_COMMIT_HASH', "\"${versionDetails().gitHash}\""
+        } else
+            buildConfigField 'String', 'GIT_COMMIT_HASH', '""'
+
         // output full debug symbols in every configuration for stack trace symbolication
         ndk {
             debugSymbolLevel 'FULL'
         }
+    }
+
+    android.applicationVariants.configureEach { variant ->
+        if (variant.name == "debug")
+            variant.outputs.each { output ->
+                output.versionCodeOverride = defaultConfig.versionCode + 1
+                output.versionNameOverride = '2.4.3-dev'
+            }
     }
 
     signingConfigs {
