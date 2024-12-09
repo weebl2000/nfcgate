@@ -8,9 +8,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.tu_darmstadt.seemoo.nfcgate.gui.component.FileShare;
+import de.tu_darmstadt.seemoo.nfcgate.gui.component.ContentShare;
 
-public class PcapStream implements FileShare.IFileShareable {
+public class PcapStream implements ContentShare.IFileShareable {
     private static final int BLOCK_TYPE_SECTION = 0x0A0D0D0A;
     private static final int BLOCK_LEN_SECTION = 4*7;
     private static final int BLOCK_TYPE_INTERFACE = 0x00000001;

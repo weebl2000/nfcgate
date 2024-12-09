@@ -12,7 +12,7 @@ import de.tu_darmstadt.seemoo.nfcgate.db.SessionLog;
 import de.tu_darmstadt.seemoo.nfcgate.db.model.SessionLogEntryViewModel;
 import de.tu_darmstadt.seemoo.nfcgate.db.model.SessionLogEntryViewModelFactory;
 import de.tu_darmstadt.seemoo.nfcgate.db.pcapng.ISO14443Stream;
-import de.tu_darmstadt.seemoo.nfcgate.gui.component.FileShare;
+import de.tu_darmstadt.seemoo.nfcgate.gui.component.ContentShare;
 import de.tu_darmstadt.seemoo.nfcgate.util.NfcComm;
 
 public class LogAction {
@@ -53,10 +53,11 @@ public class LogAction {
 
     public void share(SessionLog sessionLog, List<NfcComm> logItems) {
         // share pcap
-        new FileShare(mFragment.getActivity())
+        new ContentShare(mFragment.getActivity())
                 .setPrefix(sessionLog.toString())
                 .setExtension(".pcapng")
                 .setMimeType("application/*")
-                .share(new ISO14443Stream().append(logItems));
+                .setFile(new ISO14443Stream().append(logItems))
+                .share();
     }
 }

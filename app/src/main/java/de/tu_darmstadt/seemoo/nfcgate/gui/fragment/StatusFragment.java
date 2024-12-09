@@ -23,7 +23,7 @@ import com.jaredrummler.android.device.DeviceName;
 import de.tu_darmstadt.seemoo.nfcgate.BuildConfig;
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.gui.component.CustomArrayAdapter;
-import de.tu_darmstadt.seemoo.nfcgate.gui.component.FileShare;
+import de.tu_darmstadt.seemoo.nfcgate.gui.component.ContentShare;
 import de.tu_darmstadt.seemoo.nfcgate.gui.component.StatusItem;
 import de.tu_darmstadt.seemoo.nfcgate.nfc.NfcManager;
 import de.tu_darmstadt.seemoo.nfcgate.nfc.chip.NfcChip;
@@ -98,23 +98,43 @@ public class StatusFragment extends BaseFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_export) {
-            exportData();
+        if (item.getItemId() == R.id.action_copy) {
+            shareConfigAsText();
+            return true;
+        }
+        else if (item.getItemId() == R.id.action_export) {
+            shareConfigAsFile();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    void exportData() {
-        final StringBuilder str = new StringBuilder();
-        for (int i = 0; i < mStatusAdapter.getCount();  i++)
-            str.append(str.length() == 0 ? "" : "\n").append(mStatusAdapter.getItem(i).toString());
+    String buildConfigContent() {
+        // add app version
+        final StringBuilder str = new StringBuilder("Version: ")
+                .append(AboutFragment.getVersionNameGit());
 
-        new FileShare(getActivity())
+        // add full device info
+        for (int i = 0; i < mStatusAdapter.getCount();  i++)
+            str.append("\n").append(mStatusAdapter.getItem(i));
+
+        return str.toString();
+    }
+
+    void shareConfigAsText() {
+        new ContentShare(getActivity())
+                .setMimeType("text/plain")
+                .setText(buildConfigContent())
+                .share();
+    }
+
+    void shareConfigAsFile() {
+        new ContentShare(getActivity())
                 .setPrefix("config")
                 .setExtension(".txt")
                 .setMimeType("text/plain")
-                .share(stream -> stream.write(str.toString().getBytes()));
+                .setFile(stream -> stream.write(buildConfigContent().getBytes()))
+                .share();
     }
 
     void detect() {

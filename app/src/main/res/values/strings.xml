@@ -72,7 +72,8 @@
     <string name="status_error">Error</string>
     <string name="status_yes">Yes</string>
     <string name="status_no">No</string>
-    <string name="status_export">Export</string>
+    <string name="status_copy">Copy config</string>
+    <string name="status_export">Export config</string>
     <string name="status_devname">Device Name</string>
     <string name="status_version">Android Version</string>
     <string name="status_build">Build Number</string>
@@ -107,7 +108,6 @@
     <string name="nav_logging">Logging</string>
 
     <string name="share_error">Share error</string>
-    <string name="share_file">Share file</string>
 
     <string name="menu_status">Status</string>
     <string name="menu_clone">Clone Mode</string>
