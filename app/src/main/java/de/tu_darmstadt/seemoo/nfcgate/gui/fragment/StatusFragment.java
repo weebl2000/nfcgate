@@ -20,7 +20,6 @@ import android.widget.TextView;
 
 import com.jaredrummler.android.device.DeviceName;
 
-import de.tu_darmstadt.seemoo.nfcgate.BuildConfig;
 import de.tu_darmstadt.seemoo.nfcgate.R;
 import de.tu_darmstadt.seemoo.nfcgate.gui.component.CustomArrayAdapter;
 import de.tu_darmstadt.seemoo.nfcgate.gui.component.ContentShare;
@@ -169,8 +168,8 @@ public class StatusFragment extends BaseFragment {
         // android version should be OK for all supported versions
         StatusItem result = new StatusItem(getContext(), getString(R.string.status_version)).setValue(Build.VERSION.RELEASE);
 
-        // Android 15 and above is untested
-        if (Build.VERSION.SDK_INT > 34)
+        // Android 16 and above is untested
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.VANILLA_ICE_CREAM)
             result.setWarn(getString(R.string.warn_AV));
 
         return result;
