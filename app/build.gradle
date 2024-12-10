@@ -72,6 +72,12 @@ android {
     buildFeatures {
         buildConfig true
     }
+
+    dependenciesInfo {
+        // disable dependency metadata when building APKs and Android App Bundles
+        includeInApk false
+        includeInBundle false
+    }
 }
 
 dependencies {
