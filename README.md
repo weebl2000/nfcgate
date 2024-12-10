@@ -30,7 +30,7 @@ purposes.
 ## Requirements for specific modes
 
 - NFC support
-- Android 4.4+ (API level 19+)
+- Android 5+ (API level 21+)
 - [Xposed](https://repo.xposed.info/)-compatible hooking
   framework ([EdXposed](https://github.com/ElderDrivers/EdXposed), [LSPosed](https://github.com/LSPosed/LSPosed)
   with Zygisk or Riru): On-device capture, relay tag mode, replay tag mode, clone mode.
