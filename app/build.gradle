@@ -13,7 +13,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace 'de.tu_darmstadt.seemoo.nfcgate'
 
-    compileSdk 34
+    compileSdk 35
     ndkVersion '22.1.7171670'
 
     compileOptions {
@@ -24,7 +24,7 @@ android {
     defaultConfig {
         applicationId 'de.tu_darmstadt.seemoo.nfcgate'
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 35
         multiDexEnabled true
         versionCode 12
         versionName '2.4.2'
