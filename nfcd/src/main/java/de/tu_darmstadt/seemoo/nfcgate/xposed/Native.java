@@ -10,4 +10,5 @@ public class Native {
     public native boolean isPatchEnabled();
     public native void setConfig(byte[] config);
     public native void resetConfig();
+    public native boolean initializeHiddenApiBypass();
 }

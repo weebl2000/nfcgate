@@ -192,10 +192,20 @@ HookResult HookGlobals::setupHooking() {
     // check if NCI library exists and is loaded
     if (mLibNFC.empty()) {
         const auto candidate = findLibNFC();
-        LOG_ASSERT_S(candidate, return HookResult::ERROR_RETRY, "Library not found or not accessible");
+        if (!candidate) {
+            LOGE("NFC library not found - this may indicate APEX module isolation on Android 16+");
+            LOGE("Ensure AndroidHiddenApiBypass is properly initialized");
+            return HookResult::ERROR_RETRY;
+        }
 
         mLibNFC = candidate.value();
         LOGI("Library found at %s", mLibNFC.name().c_str());
+        
+        // Check if we're dealing with an APEX library
+        if (mLibNFC.name().find("/apex/") != std::string::npos || 
+            mLibNFC.name().find("com.android.nfc") != std::string::npos) {
+            LOGI("Detected APEX NFC library, enhanced compatibility mode active");
+        }
     }
 
     return HookResult::SUCCESS;
@@ -269,6 +279,7 @@ static std::optional<LoadedLibrary> selectJNICandidate(const std::vector<LoadedL
 std::optional<LoadedLibrary> HookGlobals::findLibNFC() const {
     std::vector<LoadedLibrary> finalists;
 
+    // First check loaded libraries from mapInfo
     for (const auto &libPath : mapInfo.loadedLibraries()) {
         LoadedLibrary candidate(libPath);
         LOGD("findLibNFC: candidate: %s", candidate.name().c_str());
@@ -289,6 +300,35 @@ std::optional<LoadedLibrary> HookGlobals::findLibNFC() const {
         LOGD("findLibNFC: candidate handle found: %s", candidate.name().c_str());
 
         finalists.push_back(candidate);
+    }
+
+    // If no candidates found, try common APEX NFC library paths
+    if (finalists.empty()) {
+        std::vector<std::string> apexNfcLibs = {
+            "/apex/com.android.nfc/lib64/libnfc_nci.so",
+            "/apex/com.android.nfc/lib/libnfc_nci.so",
+            "/system/apex/com.android.nfc/lib64/libnfc_nci.so", 
+            "/system/apex/com.android.nfc/lib/libnfc_nci.so",
+            "/apex/com.android.nfc/lib64/libnfc-nci.so",
+            "/apex/com.android.nfc/lib/libnfc-nci.so",
+            "/system/apex/com.android.nfc/lib64/libnfc-nci.so",
+            "/system/apex/com.android.nfc/lib/libnfc-nci.so",
+        };
+
+        for (const auto& apexPath : apexNfcLibs) {
+            LOGD("findLibNFC: trying APEX path: %s", apexPath.c_str());
+            LoadedLibrary candidate(apexPath);
+            
+            // Check if library exists and has required symbols
+            if (candidate.createSymbolTable() && candidate.symbolTable().contains("NFC_SetConfig")) {
+                LOGD("findLibNFC: APEX candidate contains symbol 'NFC_SetConfig': %s", apexPath.c_str());
+                
+                if (candidate.findLibraryHandle()) {
+                    LOGD("findLibNFC: APEX candidate handle found: %s", apexPath.c_str());
+                    finalists.push_back(candidate);
+                }
+            }
+        }
     }
 
     if (finalists.empty())
@@ -343,6 +383,21 @@ uint32_t HookGlobals::findNFACBOffset() {
 void *HookGlobals::getLibraryHandle(const char *filename) const {
     int flag = RTLD_NOW | RTLD_NOLOAD;
 
+    // For APEX modules, try common APEX paths first
+    std::vector<std::string> apexPaths = {
+        std::string("/apex/com.android.nfc/lib64/") + filename,
+        std::string("/apex/com.android.nfc/lib/") + filename,
+        std::string("/system/apex/com.android.nfc/lib64/") + filename,
+        std::string("/system/apex/com.android.nfc/lib/") + filename,
+    };
+
+    for (const auto& apexPath : apexPaths) {
+        if (void *result = dlopen(apexPath.c_str(), flag)) {
+            LOGI("Library %s handle found in APEX path: %s", filename, apexPath.c_str());
+            return result;
+        }
+    }
+
     // try with standard dlopen first
     if (void *result = dlopen(filename, flag)) {
         LOGI("Library %s handle found in global or current namespace", filename);
@@ -355,6 +410,16 @@ void *HookGlobals::getLibraryHandle(const char *filename) const {
             if (void *result = dlopenWithNamespace(filename, flag, nsName)) {
                 LOGI("Library %s handle found in namespace %s", filename, nsName);
                 return result;
+            }
+        }
+        
+        // Also try APEX paths with namespaces
+        for (const char *nsName : KNOWN_NAMESPACES) {
+            for (const auto& apexPath : apexPaths) {
+                if (void *result = dlopenWithNamespace(apexPath.c_str(), flag, nsName)) {
+                    LOGI("Library %s handle found in APEX path %s with namespace %s", filename, apexPath.c_str(), nsName);
+                    return result;
+                }
             }
         }
     }

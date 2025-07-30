@@ -50,6 +50,9 @@ public:
         "system",
         "sphal",
         "product",
+        "com_android_nfc",          // APEX NFC namespace
+        "com_android_tethering",    // Additional APEX namespace
+        "runtime",                  // Runtime APEX namespace
     };
 
     MapInfo mapInfo;

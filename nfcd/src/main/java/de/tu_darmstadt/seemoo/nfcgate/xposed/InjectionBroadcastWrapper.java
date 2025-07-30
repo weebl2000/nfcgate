@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 public class InjectionBroadcastWrapper extends BroadcastReceiver {
@@ -19,12 +20,15 @@ public class InjectionBroadcastWrapper extends BroadcastReceiver {
     private boolean mCaptureEnabled = false;
     private final ArrayList<Bundle> mCaptured = new ArrayList<>();
 
-    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+    @SuppressLint("UnspecifiedRegisterReceiverFlag") 
     public InjectionBroadcastWrapper(Context ctx) {
         mCtx = ctx;
 
-        // load our native library
+        // load our native library first
         loadForeignLibrary(ctx, "de.tu_darmstadt.seemoo.nfcgate", "nfcgate");
+
+        // Initialize AndroidHiddenApiBypass in the NFC service process after library is loaded
+        initializeHiddenApiBypass();
 
         // start broadcast receiver on handler thread
         HandlerThread ht = new HandlerThread("ht");
@@ -128,5 +132,26 @@ public class InjectionBroadcastWrapper extends BroadcastReceiver {
 
     private String combinePath(String p1, String p2) {
         return p1 + (p1.endsWith("/") ? "" : "/") + p2;
+    }
+
+    /**
+     * Initialize AndroidHiddenApiBypass in the NFC service process.
+     * This is critical for APEX NFC library access on Android 16+.
+     */
+    private void initializeHiddenApiBypass() {
+        Log.i("HOOKNFC", "Initializing hidden API bypass in NFC service process for Android " + Build.VERSION.SDK_INT);
+        
+        try {
+            boolean success = Native.Instance.initializeHiddenApiBypass();
+            if (success) {
+                Log.i("HOOKNFC", "Hidden API bypass initialized successfully in NFC service via native call");
+            } else {
+                Log.w("HOOKNFC", "Hidden API bypass initialization failed in NFC service");
+                Log.w("HOOKNFC", "APEX NFC library access may fail on Android 16+");
+            }
+        } catch (Exception e) {
+            Log.e("HOOKNFC", "Failed to initialize hidden API bypass in NFC service", e);
+            Log.e("HOOKNFC", "APEX NFC library access may fail on Android 16+");
+        }
     }
 }

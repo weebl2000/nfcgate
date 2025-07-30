@@ -1,5 +1,6 @@
 #include <nfcd/nfcd.h>
 #include <jni.h>
+#include <dlfcn.h>
 
 static void beginCollectingEvents() {
     globals.eventQueue.beginCollecting();
@@ -107,8 +108,18 @@ void applyConfig(Config &config) {
     usleep(35000);
 }
 
+// Log initialization status - bypass should already be initialized from Java
+static void logNativeInitialization() {
+    LOGI("[nfcd] Native hook initialization starting");
+    LOGI("[nfcd] Hidden API bypass should be active from Application.onCreate()");
+    LOGI("[nfcd] Enhanced APEX compatibility mode enabled");
+}
+
 extern "C" {
     JNIEXPORT jint JNICALL Java_de_tu_1darmstadt_seemoo_nfcgate_xposed_Native_installHooks(JNIEnv *, jobject) {
+        // Log initialization status - bypass should already be active from Java side
+        logNativeInitialization();
+        
         return static_cast<int>(globals.installHooks());
     }
 
@@ -170,6 +181,55 @@ extern "C" {
             reenableEEs();
             // re-enable discovery after changes were made
             nfaEnableDiscovery();
+        }
+    }
+
+    JNIEXPORT jboolean JNICALL Java_de_tu_1darmstadt_seemoo_nfcgate_xposed_Native_initializeHiddenApiBypass(JNIEnv *env, jobject) {
+        LOGI("[nfcd] Native hidden API bypass initialization requested");
+        
+        // Use JNI to call back to Java HiddenApiBypass
+        // This allows us to access the bypass functionality from native context
+        jclass hiddenApiBypassClass = env->FindClass("org/lsposed/hiddenapibypass/HiddenApiBypass");
+        if (!hiddenApiBypassClass) {
+            LOGW("[nfcd] AndroidHiddenApiBypass class not found in native context");
+            env->ExceptionClear();
+            return JNI_FALSE;
+        }
+        
+        jmethodID addHiddenApiExemptions = env->GetStaticMethodID(hiddenApiBypassClass, "addHiddenApiExemptions", "(Ljava/lang/String;)Z");
+        if (!addHiddenApiExemptions) {
+            LOGW("[nfcd] addHiddenApiExemptions method not found");
+            env->ExceptionClear();
+            return JNI_FALSE;
+        }
+        
+        // Add core library exemptions
+        jstring exemption_L = env->NewStringUTF("L");
+        jboolean success = env->CallStaticBooleanMethod(hiddenApiBypassClass, addHiddenApiExemptions, exemption_L);
+        env->DeleteLocalRef(exemption_L);
+        
+        if (success) {
+            LOGI("[nfcd] Core library (L) exemptions added successfully from native");
+            
+            // Add additional specific exemptions
+            const char* exemptions[] = {
+                "Landroid/nfc/",
+                "Landroid/os/", 
+                "Lcom/android/nfc/",
+                "Landroid/content/pm/"
+            };
+            
+            for (const char* exemption : exemptions) {
+                jstring exemption_str = env->NewStringUTF(exemption);
+                env->CallStaticBooleanMethod(hiddenApiBypassClass, addHiddenApiExemptions, exemption_str);
+                env->DeleteLocalRef(exemption_str);
+            }
+            
+            LOGI("[nfcd] Additional APEX-specific exemptions added from native");
+            return JNI_TRUE;
+        } else {
+            LOGW("[nfcd] Failed to add core library exemptions from native");
+            return JNI_FALSE;
         }
     }
 }

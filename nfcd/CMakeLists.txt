@@ -27,6 +27,13 @@ if (CMAKE_SYSTEM_PROCESSOR STREQUAL aarch64)
     endif()
 endif()
 
+# 16KB page size support - ensure compatibility with both 4KB and 16KB devices
+if (CMAKE_SYSTEM_PROCESSOR STREQUAL aarch64)
+    # Set maximum page size to 16KB for arm64-v8a
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size=16384")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,max-page-size=16384")
+endif()
+
 # link library
 target_link_libraries(nfcgate android log xh)
 # include directory
