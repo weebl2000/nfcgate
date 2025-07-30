@@ -4,7 +4,7 @@ plugins {
 
 android {
     compileSdk 35
-    ndkVersion '22.1.7171670'
+    ndkVersion '27.3.13750724'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -25,6 +25,8 @@ android {
         externalNativeBuild {
             cmake {
                 arguments '-DANDROID_STL=c++_static', '-DANDROID_ARM_MODE=arm'
+                // Add 16KB page size support for arm64-v8a
+                cppFlags '-DANDROID_16KB_PAGE_SIZE_COMPAT'
             }
         }
     }

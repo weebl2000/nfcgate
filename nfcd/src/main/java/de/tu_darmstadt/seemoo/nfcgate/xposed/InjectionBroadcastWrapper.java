@@ -18,6 +18,14 @@ public class InjectionBroadcastWrapper extends BroadcastReceiver {
     private final Context mCtx;
     private boolean mCaptureEnabled = false;
     private final ArrayList<Bundle> mCaptured = new ArrayList<>();
+    private static Hooks sHooksInstance = null;
+    
+    /**
+     * Set the hooks instance for status checking
+     */
+    public static void setHooksInstance(Hooks hooks) {
+        sHooksInstance = hooks;
+    }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     public InjectionBroadcastWrapper(Context ctx) {
@@ -95,10 +103,17 @@ public class InjectionBroadcastWrapper extends BroadcastReceiver {
             }
         }
         else if ("INSTALL_HOOKS".equals(op)) {
-            // deliver hook status
+            // deliver hook status - check both legacy native hooks and new multi-layer hooks
+            boolean hookEnabled = installHooks() == HookResult.SUCCESS;
+            if (!hookEnabled && sHooksInstance != null) {
+                // Fallback to new hook approaches for Android 16 compatibility
+                hookEnabled = sHooksInstance.isAnyHookEnabled();
+                Log.i("HOOKNFC", "Using multi-layer hook status: " + sHooksInstance.getHookStatusDetails());
+            }
+            
             mCtx.startActivity(makeResponseIntent()
                     .putExtra("type", "HOOK_STATUS")
-                    .putExtra("hookEnabled", installHooks() == HookResult.SUCCESS));
+                    .putExtra("hookEnabled", hookEnabled));
         }
     }
 
