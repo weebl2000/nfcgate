@@ -196,8 +196,8 @@ public class StatusFragment extends BaseFragment {
         // android version should be OK for all supported versions
         StatusItem result = new StatusItem(getContext(), getString(R.string.status_version)).setValue(versionText);
 
-        // Android 16 and above is untested
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.VANILLA_ICE_CREAM)
+        // Android 17 and above is untested (Android 16/Baklava is now tested)
+        if (Build.VERSION.SDK_INT > 36 /* Build.VERSION_CODES.BAKLAVA */)
             result.setWarn(getString(R.string.warn_AV));
 
         return result;
